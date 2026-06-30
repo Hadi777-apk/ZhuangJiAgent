@@ -927,6 +927,34 @@ function Test-OnlineStubInstaller {
     return $false
 }
 
+function Get-ManualInstallReason {
+    param([object]$App)
+
+    $name = [string](Get-ConfigValue -Object $App -Name "name" -Default "未命名软件")
+
+    if (Test-OnlineStubInstaller -App $App) {
+        $requiresStoreInstaller = Get-BoolConfig -Object $App -Name "requiresStoreInstaller" -Default $false
+        if ($requiresStoreInstaller) {
+            return "安装包是 Store Installer 在线引导器，可能需要联网或 Microsoft Store 组件，不执行静默自动安装。"
+        }
+
+        return "安装包疑似在线引导器，可能需要联网，不执行静默自动安装。"
+    }
+
+    $autoInstallEnabled = Get-BoolConfig -Object $App -Name "autoInstallEnabled" -Default $true
+    $requireManualConfirm = Get-BoolConfig -Object $App -Name "requireManualConfirmBeforeInstall" -Default $false
+
+    if (-not $autoInstallEnabled -or $requireManualConfirm) {
+        if ($name -eq "ToDesk") {
+            return "ToDesk 是远控软件，静默安装参数不可靠，建议人工安装。"
+        }
+
+        return "该软件配置为需要人工确认，默认不执行静默自动安装。"
+    }
+
+    return ""
+}
+
 function Test-AppInstallerReady {
     param([object]$App)
 
@@ -1034,8 +1062,9 @@ function Install-App {
     $type = ([string](Get-ConfigValue -Object $App -Name "type" -Default "exe")).ToLowerInvariant()
     $timeout = [int](Get-ConfigValue -Object $Script:Config.settings -Name "installTimeoutMinutes" -Default 20)
 
-    if (Test-OnlineStubInstaller -App $App) {
-        $reason = "安装包被标记为在线引导器，需要联网或商店组件，默认不执行静默自动安装，请人工确认。"
+    $manualReason = Get-ManualInstallReason -App $App
+    if (-not [string]::IsNullOrWhiteSpace($manualReason)) {
+        $reason = $manualReason
         Write-Log -Message "[跳过] $appName：$reason" -Level "WARN"
         return [PSCustomObject]@{ Success = $false; Attempted = $false; ExitCode = 1; Message = $reason }
     }
@@ -1150,7 +1179,12 @@ function Refresh-EnvironmentPath {
             "%ProgramFiles%\Python312\Scripts",
             "%ProgramFiles(x86)%\Python312",
             "%ProgramFiles(x86)%\Python312\Scripts",
-            "%APPDATA%\npm"
+            "%APPDATA%\npm",
+            "%ProgramFiles%\Git\cmd",
+            "%ProgramFiles%\Git\bin",
+            "%ProgramFiles(x86)%\Git\cmd",
+            "%ProgramFiles(x86)%\Git\bin",
+            "%LOCALAPPDATA%\Programs\Git\cmd"
         )
 
         foreach ($pathTemplate in $knownPaths) {
@@ -1184,7 +1218,7 @@ function Refresh-EnvironmentPath {
     $env:Path = ($uniquePaths -join ";")
     Write-Log -Message "[环境变量] 当前会话 PATH 已刷新。" -Level "SUCCESS"
 
-    foreach ($command in @("python --version", "node -v", "npm -v")) {
+    foreach ($command in @("python --version", "node -v", "npm -v", "git --version")) {
         $result = Invoke-CommandText -CommandText $command -TimeoutSeconds 20
         if ($result.ExitCode -eq 0) {
             Write-Log -Message "[检测] $command => $($result.Output)" -Level "SUCCESS"
@@ -1276,6 +1310,7 @@ function Generate-Report {
     } else {
         $lines.Add("- 成功：$(@($Results | Where-Object { $_.InstallResult -eq '成功' -and $_.Action -ne '跳过' }).Count)") | Out-Null
         $lines.Add("- 跳过：$(@($Results | Where-Object { $_.Action -eq '跳过' }).Count)") | Out-Null
+        $lines.Add("- 人工确认：$(@($Results | Where-Object { $_.Action -eq '人工确认' -or $_.InstallResult -eq '人工确认' }).Count)") | Out-Null
         $lines.Add("- 失败：$(@($Results | Where-Object { $_.InstallResult -eq '失败' }).Count)") | Out-Null
     }
 
@@ -1342,6 +1377,7 @@ function Show-Summary {
 
     $success = @($Results | Where-Object { $_.InstallResult -eq "成功" -and $_.Action -ne "跳过" }).Count
     $skipped = @($Results | Where-Object { $_.Action -eq "跳过" }).Count
+    $manualConfirm = @($Results | Where-Object { $_.Action -eq "人工确认" -or $_.InstallResult -eq "人工确认" }).Count
     $failed = @($Results | Where-Object { $_.InstallResult -eq "失败" }).Count
 
     Write-Host ""
@@ -1351,6 +1387,7 @@ function Show-Summary {
     Write-Host ""
     Write-Host "成功：$success" -ForegroundColor Green
     Write-Host "跳过：$skipped" -ForegroundColor Yellow
+    Write-Host "人工确认：$manualConfirm" -ForegroundColor Yellow
     Write-Host "失败：$failed" -ForegroundColor Red
     Write-Host ""
     Write-Host "报告路径："
@@ -1484,6 +1521,13 @@ function Run-InstallOrUpgrade {
 
         if (-not $shouldInstall) {
             $results += New-AppRunResult -App $app -InitialDetection $initial -FinalDetection $initial -Action "跳过" -InstallResult "跳过" -Note $note
+            continue
+        }
+
+        $manualInstallReason = Get-ManualInstallReason -App $app
+        if (-not [string]::IsNullOrWhiteSpace($manualInstallReason)) {
+            Write-Log -Message "[人工确认] $name：$manualInstallReason" -Level "WARN"
+            $results += New-AppRunResult -App $app -InitialDetection $initial -FinalDetection $initial -Action "人工确认" -InstallResult "人工确认" -Note $manualInstallReason
             continue
         }
 
@@ -4793,7 +4837,7 @@ function Get-AppInstallLocationPlan {
         if ([string]::IsNullOrWhiteSpace($argsTemplate)) {
             $extraNotes.Add("安装器自定义目录参数未知，需人工确认") | Out-Null
         }
-    } elseif ($appPolicy -eq "default_only") {
+    } elseif ($appPolicy -eq "default_only" -or $appPolicy -eq "default") {
         $action = "保持默认"
         $suggestedDir = "-"
     } elseif ($appPolicy -eq "manual_confirm") {
@@ -5042,6 +5086,9 @@ function Build-InstallCommandPreview {
     $locationPolicy = [string](Get-ConfigValue -Object $App -Name "installLocationPolicy" -Default "manual_confirm")
     $locationNotes = [string](Get-ConfigValue -Object $App -Name "installLocationNotes" -Default "")
     $managedBy = [string](Get-ConfigValue -Object $App -Name "managedBy" -Default "")
+    $installerKind = [string](Get-ConfigValue -Object $App -Name "installerKind" -Default "")
+    $offlineInstallSupportedValue = Get-ConfigValue -Object $App -Name "offlineInstallSupported" -Default $null
+    $requiresNetworkValue = Get-ConfigValue -Object $App -Name "requiresNetwork" -Default $null
     $isOnlineStub = Test-OnlineStubInstaller -App $App
     $notes = New-Object System.Collections.Generic.List[string]
 
@@ -5063,6 +5110,9 @@ function Build-InstallCommandPreview {
     }
     if ($isOnlineStub) {
         $notes.Add("安装包存在，但疑似在线引导安装器，不保证离线安装成功，建议人工确认。") | Out-Null
+    }
+    if (-not [string]::IsNullOrWhiteSpace((Get-ManualInstallReason -App $App)) -and -not $isOnlineStub) {
+        $notes.Add("仅供参考，不建议自动静默安装。") | Out-Null
     }
 
     $primarySilentArg = ""
@@ -5112,12 +5162,22 @@ function Build-InstallCommandPreview {
     if ($isOnlineStub) {
         $manualConfirm = $true
     }
+    if (-not [string]::IsNullOrWhiteSpace((Get-ManualInstallReason -App $App))) {
+        $manualConfirm = $true
+    }
     if ($risk -eq "high" -or $locationPolicy -eq "manual_confirm") {
         $manualConfirm = $true
     }
 
     $noteText = if ($notes.Count -eq 0) { "-" } else { (@($notes) -join "；") }
     $packageExistsText = if ($package.Exists) { "是" } else { "否" }
+    $installerFileText = if ([string]::IsNullOrWhiteSpace($package.InstallerName)) { "-" } else { $package.InstallerName }
+    $installerKindText = if ([string]::IsNullOrWhiteSpace($installerKind)) { "未知" } else { $installerKind }
+    $offlineInstallSupportedText = if ($null -eq $offlineInstallSupportedValue) { "未知" } elseif (Get-BoolConfig -Object $App -Name "offlineInstallSupported" -Default $false) { "是" } else { "否" }
+    $requiresNetworkText = if ($null -eq $requiresNetworkValue) { "未知" } elseif (Get-BoolConfig -Object $App -Name "requiresNetwork" -Default $false) { "是" } else { "否" }
+    $allowAutoInstall = Get-BoolConfig -Object $App -Name "autoInstallEnabled" -Default $true
+    $manualReasonForAutoInstall = Get-ManualInstallReason -App $App
+    $allowAutoInstallText = if ($package.Installable -and $allowAutoInstall -and [string]::IsNullOrWhiteSpace($manualReasonForAutoInstall)) { "是" } else { "否" }
     $suggestedDirText = if ([string]::IsNullOrWhiteSpace($customDir)) { "-" } else { $customDir }
     $silentText = if ($silentArgs.Count -eq 0) { "-" } else { ($silentArgs -join "；") }
     $dirArgsText = if ([string]::IsNullOrWhiteSpace($dirArgs)) {
@@ -5136,7 +5196,12 @@ function Build-InstallCommandPreview {
         Name = $name
         CurrentStatus = $currentStatus
         PackageExists = $packageExistsText
+        InstallerFileName = $installerFileText
         PackageType = $package.Type
+        InstallerKind = $installerKindText
+        OfflineInstallSupported = $offlineInstallSupportedText
+        RequiresNetwork = $requiresNetworkText
+        AllowAutoInstall = $allowAutoInstallText
         SupportCustomInstallDir = $supportText
         SuggestedInstallDir = $suggestedDirText
         SilentArgs = $silentText
@@ -5169,16 +5234,21 @@ function Generate-InstallCommandPreviewReport {
     $lines.Add("") | Out-Null
     $lines.Add("## 预计安装命令") | Out-Null
     $lines.Add("") | Out-Null
-    $lines.Add("| 软件 | 当前状态 | 安装包存在 | 类型 | 支持自定义目录 | 建议目录 | 静默参数 | 自定义目录参数 | 预计安装命令 | 风险 | 建议人工确认 | 备注 |") | Out-Null
-    $lines.Add("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |") | Out-Null
+    $lines.Add("| 软件 | 当前状态 | 安装包存在 | 安装包文件 | 类型 | installerKind | 完整离线安装 | 需要联网 | 允许首次自动安装 | 支持自定义目录 | 建议目录 | 静默参数 | 自定义目录参数 | 预计安装命令 | 风险 | 建议人工确认 | 备注 |") | Out-Null
+    $lines.Add("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |") | Out-Null
 
     foreach ($result in $Results) {
         $lines.Add((
-            "| {0} | {1} | {2} | {3} | {4} | {5} | {6} | {7} | {8} | {9} | {10} | {11} |" -f
+            "| {0} | {1} | {2} | {3} | {4} | {5} | {6} | {7} | {8} | {9} | {10} | {11} | {12} | {13} | {14} | {15} | {16} |" -f
             (Escape-MarkdownCell $result.Name),
             (Escape-MarkdownCell $result.CurrentStatus),
             (Escape-MarkdownCell $result.PackageExists),
+            (Escape-MarkdownCell $result.InstallerFileName),
             (Escape-MarkdownCell $result.PackageType),
+            (Escape-MarkdownCell $result.InstallerKind),
+            (Escape-MarkdownCell $result.OfflineInstallSupported),
+            (Escape-MarkdownCell $result.RequiresNetwork),
+            (Escape-MarkdownCell $result.AllowAutoInstall),
             (Escape-MarkdownCell $result.SupportCustomInstallDir),
             (Escape-MarkdownCell $result.SuggestedInstallDir),
             (Escape-MarkdownCell $result.SilentArgs),
@@ -5239,7 +5309,7 @@ function Show-Menu {
     while ($true) {
         Clear-Host
         Write-Host "========================================="
-        Write-Host "AI 开发环境初始化工具 v2.5.1"
+        Write-Host "AI 开发环境初始化工具 v2.5.3"
         Write-Host "========================================="
         Write-Host ""
         Write-Host "请选择操作："

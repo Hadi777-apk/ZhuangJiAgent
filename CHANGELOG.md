@@ -1,5 +1,41 @@
 # Changelog
 
+## v2.5.3 - Git 支持
+
+- 新增 Git 支持：
+  - `config.json` 新增 `Git`。
+  - `update-config.json` 新增 `Git`，策略为 `detect_only`。
+  - 安装包使用 `installers/git.exe`。
+  - 识别为 Git for Windows 离线安装包：`installerKind: offline_installer`。
+  - 允许新电脑首次离线安装，但已安装时默认跳过，不自动升级。
+- Git 检测规则：
+  - `git --version`。
+  - `versionCommand: git --version`。
+  - 支持常见 `%ProgramFiles%\Git` 和 `%LOCALAPPDATA%\Programs\Git` 路径。
+- Git 安装后处理：
+  - 安装成功后刷新当前 PowerShell 会话 PATH。
+  - 复检 `git --version`。
+- 文档和验收清单同步更新到 v2.5.3。
+
+## v2.5.2 - 新电脑实测稳定性修正
+
+- Added Google Chrome offline MSI support:
+  - `config.json` 中 Google Chrome 使用 `chrome.msi`。
+  - `type: msi`，`installerKind: offline_installer`。
+  - 支持新电脑首次离线安装，但已安装时默认跳过，不自动升级。
+- Improved Claude Desktop detection:
+  - 补充 `HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\AnthropicClaude`。
+  - 补充 `%LOCALAPPDATA%\AnthropicClaude` 和 `%LOCALAPPDATA%\AnthropicClaude\claude.exe`。
+- Changed ToDesk to manual confirmation:
+  - `autoInstallEnabled: false`。
+  - `requireManualConfirmBeforeInstall: true`。
+  - 不再参与 `[1]` 自动静默安装。
+- Changed Codex `online_stub` from failure to manual confirmation:
+  - Codex 桌面端仍不是完整离线包。
+  - 默认人工确认，不计入失败。
+- Added manual confirmation count in reports:
+  - 安装/升级汇总新增“人工确认”口径。
+
 ## v2.5.1 - 安装命令预演与封版整理
 
 - 新增 `[11] 安装命令预演`，退出调整为 `[12]`。
@@ -8,6 +44,10 @@
 - 接入 Claude Desktop：
   - `config.json` 新增 `Claude Desktop`。
   - `update-config.json` 新增 `Claude Desktop`，默认只检测，不自动下载、不自动升级。
+- 接入 Google Chrome：
+  - `config.json` 新增 `Google Chrome`。
+  - `update-config.json` 新增 `Google Chrome`，策略为 `detect_only`。
+  - Chrome 安装包切换为 `chrome.msi` 官方企业版离线 MSI，支持未安装时按 MSI 静默安装；已安装时默认跳过，不自动升级。
 - Codex 桌面端增加 `online_stub` 标记：
   - `installerKind: online_stub`
   - `offlineInstallSupported: false`

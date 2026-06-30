@@ -1,0 +1,12 @@
+# Runtime directories
+backups/
+cache/
+downloads/
+installers/
+logs/
+reports/
+skills/
+
+# Windows
+Thumbs.db
+Desktop.ini
