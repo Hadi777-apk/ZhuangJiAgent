@@ -1,0 +1,10 @@
+<UserControl x:Class="DevEnvInit.App.Views.InstallProgressView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Border Style="{StaticResource CardBorderStyle}">
+        <StackPanel>
+            <TextBlock Text="执行安装" FontSize="28" FontWeight="SemiBold" />
+            <TextBlock Text="后续阶段接入 dry-run 安装流程；解压只写日志，安装阶段显示总进度和软件状态。" Margin="0,12,0,0" Foreground="{StaticResource BrushMutedText}" TextWrapping="Wrap" />
+        </StackPanel>
+    </Border>
+</UserControl>

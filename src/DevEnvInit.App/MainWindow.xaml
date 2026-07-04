@@ -1,0 +1,72 @@
+<Window x:Class="DevEnvInit.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:DevEnvInit.App.ViewModels"
+        xmlns:views="clr-namespace:DevEnvInit.App.Views"
+        Title="AI 开发环境初始化工具" Height="720" Width="1180" MinHeight="620" MinWidth="980"
+        Background="{StaticResource BrushBackground}" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:DetectionViewModel}">
+            <views:DetectionView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SoftwareSelectionViewModel}">
+            <views:SoftwareSelectionView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PathConfigViewModel}">
+            <views:PathConfigView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:InstallProgressViewModel}">
+            <views:InstallProgressView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ReportViewModel}">
+            <views:ReportView />
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="280" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Background="{StaticResource BrushSurface}" BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,0,1,0" Padding="22">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Top">
+                    <TextBlock Text="AI 环境初始化" FontSize="24" FontWeight="SemiBold" />
+                    <TextBlock Text="五步线性安装向导" Margin="0,8,0,22" Foreground="{StaticResource BrushMutedText}" />
+                </StackPanel>
+
+                <ItemsControl ItemsSource="{Binding Steps}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Style="{StaticResource NavButtonStyle}"
+                                    Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding Description}" Margin="0,4,0,0" Foreground="{StaticResource BrushMutedText}" TextWrapping="Wrap" FontSize="12" />
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Column="1" Margin="26">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Style="{StaticResource CardBorderStyle}" Padding="16" Margin="0,0,0,18">
+                <DockPanel>
+                    <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource BrushMutedText}" />
+                    <TextBlock DockPanel.Dock="Right" Text="阶段 3 · WPF 壳子" Foreground="{StaticResource BrushAccent}" FontWeight="SemiBold" />
+                </DockPanel>
+            </Border>
+
+            <ContentControl Grid.Row="1" Content="{Binding CurrentStep}" />
+        </Grid>
+    </Grid>
+</Window>

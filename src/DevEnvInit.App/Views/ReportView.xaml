@@ -1,0 +1,10 @@
+<UserControl x:Class="DevEnvInit.App.Views.ReportView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Border Style="{StaticResource CardBorderStyle}">
+        <StackPanel>
+            <TextBlock Text="完成报告" FontSize="28" FontWeight="SemiBold" />
+            <TextBlock Text="后续阶段展示成功、跳过、失败、日志路径、重试建议和报告导出入口。" Margin="0,12,0,0" Foreground="{StaticResource BrushMutedText}" TextWrapping="Wrap" />
+        </StackPanel>
+    </Border>
+</UserControl>
