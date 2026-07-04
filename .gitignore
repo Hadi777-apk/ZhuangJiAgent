@@ -7,6 +7,16 @@ logs/
 reports/
 skills/
 
+# .NET / WPF build output
+src/**/bin/
+src/**/obj/
+tests/**/bin/
+tests/**/obj/
+.vs/
+TestResults/
+*.user
+*.suo
+
 # Windows
 Thumbs.db
 Desktop.ini
