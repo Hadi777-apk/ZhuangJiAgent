@@ -40,8 +40,8 @@ public partial class App : Application
         services.AddSingleton<IAllowlistService, AllowlistService>();
         services.AddSingleton<IHashVerificationService, HashVerificationService>();
         services.AddSingleton<IDiskSpaceCalculatorService, DiskSpaceCalculatorService>();
-        services.AddSingleton<IArchiveExtractionService, SevenZipExtractionService>();
         services.AddSingleton<IInstallerExecutionService, PowerShellInstallerService>();
+        services.AddSingleton<IArchiveExtractionService, SevenZipExtractionService>();
         services.AddSingleton<IReportService, ReportService>();
 
         services.AddSingleton<DetectionViewModel>();
