@@ -102,9 +102,6 @@ Sensitive handling rule: reports should describe URL/path fields by purpose unle
   - drive space inspection
   - custom root validation
   - per-app install location plan and preview reporting
-- `IInstallCommandPreviewService`:
-  - installer package info
-  - command preview generation and report output
 
 `gui.ps1` migration targets:
 
@@ -150,7 +147,7 @@ Phase 8 will decide one of two strategies:
 
 ### Planned Implementation Phases
 
-- [ ] Phase 1: Create `DevEnvInit.sln`, `DevEnvInit.Core`, models, service interfaces, and `InstallSessionState`.
+- [x] Phase 1: Create `DevEnvInit.sln`, `DevEnvInit.Core`, models, service interfaces, and `InstallSessionState`.
 - [ ] Phase 2: Create `DevEnvInit.Services` with minimal implementations for manifest loading, SHA256 verification, disk-space calculation, allowlist validation, and stubbed archive/install services.
 - [ ] Phase 3: Create `DevEnvInit.App` WPF shell with Microsoft.Extensions.DependencyInjection, five-step navigation, shared status strip, and empty pages.
 - [ ] Phase 4: Wire environment detection and software selection to real configuration data.
