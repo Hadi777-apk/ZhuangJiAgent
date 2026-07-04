@@ -151,7 +151,7 @@ Phase 8 will decide one of two strategies:
 - [x] Phase 2: Create `DevEnvInit.Services` with minimal implementations for manifest loading, SHA256 verification, disk-space calculation, allowlist validation, and stubbed archive/install services.
 - [x] Phase 3: Create `DevEnvInit.App` WPF shell with Microsoft.Extensions.DependencyInjection, five-step navigation, shared status strip, and empty pages.
 - [x] Phase 4: Wire environment detection and software selection to real configuration data.
-- [ ] Phase 5: Wire path configuration and disk-space estimates. No command preview area.
+- [x] Phase 5: Wire path configuration and disk-space estimates. No command preview area.
 - [ ] Phase 6: Wire install progress with dry-run or mock execution first. Extraction logs only; install phase shows progress.
 - [ ] Phase 7: Wire completion report generation and report display.
 - [ ] Phase 8: Decide launcher/elevation ownership, update docs, run final review and verification.

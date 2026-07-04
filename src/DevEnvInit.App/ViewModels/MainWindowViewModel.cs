@@ -1,19 +1,23 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using DevEnvInit.Core.State;
 
 namespace DevEnvInit.App.ViewModels;
 
 public sealed class MainWindowViewModel : ObservableObject
 {
     private StepViewModel _currentStep;
+    private readonly InstallSessionState _sessionState;
 
     public MainWindowViewModel(
         DetectionViewModel detection,
         SoftwareSelectionViewModel softwareSelection,
         PathConfigViewModel pathConfig,
         InstallProgressViewModel installProgress,
-        ReportViewModel report)
+        ReportViewModel report,
+        InstallSessionState? sessionState = null)
     {
+        _sessionState = sessionState ?? InstallSessionState.Empty;
         Steps = new ObservableCollection<StepViewModel>
         {
             detection,
