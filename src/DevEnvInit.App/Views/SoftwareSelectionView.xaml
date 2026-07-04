@@ -1,34 +1,69 @@
 <UserControl x:Class="DevEnvInit.App.Views.SoftwareSelectionView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Border Style="{StaticResource CardBorderStyle}">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0">
-                <TextBlock Text="软件清单" FontSize="28" FontWeight="SemiBold" />
-                <TextBlock Text="从真实 config.json 加载启用软件，按安装策略给出默认选择；需人工确认的软件不会默认勾选。" Margin="0,12,0,0" Foreground="{StaticResource BrushMutedText}" TextWrapping="Wrap" />
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="26,20,26,0">
+            <StackPanel>
+                <StackPanel>
+                    <TextBlock Text="软件清单" Style="{StaticResource PageTitleStyle}" />
+                    <TextBlock Text="从真实 config.json 加载启用软件，按策略给出默认选择"
+                               FontSize="13" Foreground="{StaticResource BrushText}" />
+                </StackPanel>
+
+                <TextBlock Text="{Binding Summary}" FontSize="12"
+                           Foreground="{StaticResource BrushMutedText}" />
+
+                <DataGrid ItemsSource="{Binding Packages}"
+                          AutoGenerateColumns="False"
+                          HeadersVisibility="Column"
+                          Background="{StaticResource BrushSurfaceCard}"
+                          Foreground="{StaticResource BrushTitle}"
+                          BorderBrush="{StaticResource BrushBorder}"
+                          BorderThickness="1"
+                          RowBackground="{StaticResource BrushSurfaceCard}"
+                          AlternatingRowBackground="#FAFAFA"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="{StaticResource BrushBorder}"
+                          RowHeight="42"
+                          CanUserReorderColumns="False"
+                          CanUserResizeRows="False">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="{StaticResource BrushSurfaceAlt}" />
+                            <Setter Property="Foreground" Value="{StaticResource BrushMutedText}" />
+                            <Setter Property="FontSize" Value="11" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                            <Setter Property="Padding" Value="12,8" />
+                            <Setter Property="BorderBrush" Value="{StaticResource BrushBorder}" />
+                            <Setter Property="BorderThickness" Value="0,0,1,1" />
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.Columns>
+                        <DataGridCheckBoxColumn Header="选择" Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Width="60" />
+                        <DataGridTextColumn Header="软件名称" Binding="{Binding Name}" Width="180" IsReadOnly="True" />
+                        <DataGridTextColumn Header="安装包文件" Binding="{Binding Installer}" Width="200" IsReadOnly="True" />
+                        <DataGridTextColumn Header="版本要求" Binding="{Binding RequiredVersion}" Width="120" IsReadOnly="True" />
+                        <DataGridTextColumn Header="安装策略" Binding="{Binding PolicyText}" Width="140" IsReadOnly="True" />
+                        <DataGridCheckBoxColumn Header="可自动选" Binding="{Binding IsEnabled}" Width="80" IsReadOnly="True" />
+                    </DataGrid.Columns>
+                </DataGrid>
             </StackPanel>
+        </ScrollViewer>
 
-            <DockPanel Grid.Row="1" Margin="0,18,0,14">
-                <Button DockPanel.Dock="Right" Content="加载清单" Padding="18,8" Command="{Binding LoadPackagesCommand}" />
-                <TextBlock Text="{Binding Summary}" VerticalAlignment="Center" Foreground="{StaticResource BrushMutedText}" TextWrapping="Wrap" />
+        <Border Grid.Row="1" BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,1,0,0"
+                Padding="26,12">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="加载清单"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding LoadPackagesCommand}" />
+                <TextBlock Text="{Binding Summary}" VerticalAlignment="Center"
+                           FontSize="12" Foreground="{StaticResource BrushMutedText}" />
             </DockPanel>
-
-            <DataGrid Grid.Row="2" ItemsSource="{Binding Packages}" AutoGenerateColumns="False" HeadersVisibility="Column" Background="{StaticResource BrushSurfaceAlt}" Foreground="{StaticResource BrushText}" BorderBrush="{StaticResource BrushBorder}" GridLinesVisibility="None">
-                <DataGrid.Columns>
-                    <DataGridCheckBoxColumn Header="选择" Binding="{Binding IsSelected}" Width="70" />
-                    <DataGridTextColumn Header="软件" Binding="{Binding Name}" Width="180" IsReadOnly="True" />
-                    <DataGridTextColumn Header="安装包" Binding="{Binding Installer}" Width="180" IsReadOnly="True" />
-                    <DataGridTextColumn Header="版本要求" Binding="{Binding RequiredVersion}" Width="130" IsReadOnly="True" />
-                    <DataGridTextColumn Header="安装策略" Binding="{Binding PolicyText}" Width="150" IsReadOnly="True" />
-                    <DataGridCheckBoxColumn Header="可自动选择" Binding="{Binding IsEnabled}" Width="110" IsReadOnly="True" />
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
-    </Border>
+        </Border>
+    </Grid>
 </UserControl>

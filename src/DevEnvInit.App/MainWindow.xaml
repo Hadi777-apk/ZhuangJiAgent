@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:DevEnvInit.App.ViewModels"
         xmlns:views="clr-namespace:DevEnvInit.App.Views"
-        Title="AI 开发环境初始化工具" Height="720" Width="1180" MinHeight="620" MinWidth="980"
+        Title="AI 开发环境初始化工具" Height="720" Width="1100" MinHeight="600" MinWidth="900"
         Background="{StaticResource BrushBackground}" WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <DataTemplate DataType="{x:Type vm:DetectionViewModel}">
@@ -23,50 +23,111 @@
         </DataTemplate>
     </Window.Resources>
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="280" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+    <Border CornerRadius="0" Background="{StaticResource BrushBackground}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="216" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="{StaticResource BrushSurface}" BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,0,1,0" Padding="22">
-            <DockPanel LastChildFill="True">
-                <StackPanel DockPanel.Dock="Top">
-                    <TextBlock Text="AI 环境初始化" FontSize="24" FontWeight="SemiBold" />
-                    <TextBlock Text="五步线性安装向导" Margin="0,8,0,22" Foreground="{StaticResource BrushMutedText}" />
-                </StackPanel>
-
-                <ItemsControl ItemsSource="{Binding Steps}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Button Style="{StaticResource NavButtonStyle}"
-                                    Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                    CommandParameter="{Binding}">
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
-                                    <TextBlock Text="{Binding Description}" Margin="0,4,0,0" Foreground="{StaticResource BrushMutedText}" TextWrapping="Wrap" FontSize="12" />
+            <!-- Sidebar -->
+            <Border Grid.Column="0" Background="{StaticResource BrushSurfaceAlt}"
+                    BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,0,1,0">
+                <DockPanel LastChildFill="True">
+                    <!-- Logo header -->
+                    <Border DockPanel.Dock="Top"
+                            BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,0,0,1"
+                            Padding="18,18,18,16">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                <Border Width="28" Height="28" Background="{StaticResource BrushPrimary}"
+                                        CornerRadius="7" Margin="0,0,10,0">
+                                    <TextBlock Text="AI" FontSize="11" FontWeight="Bold" Foreground="White"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="DEV-INIT" FontSize="13" FontWeight="Bold"
+                                               Foreground="{StaticResource BrushTitle}" />
+                                    <TextBlock Text="Environment Setup" FontSize="10"
+                                               Foreground="{StaticResource BrushMutedText}" Margin="0,1,0,0" />
                                 </StackPanel>
-                            </Button>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </DockPanel>
-        </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
 
-        <Grid Grid.Column="1" Margin="26">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+                    <!-- Footer badges -->
+                    <Border DockPanel.Dock="Bottom"
+                            BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,1,0,0"
+                            Padding="18,12">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="6" Height="6" Fill="{StaticResource BrushSuccess}" Margin="0,0,7,0" VerticalAlignment="Center" />
+                                <TextBlock Text="Windows 11 专业教育版" FontSize="11" Foreground="{StaticResource BrushText}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="6" Height="6" Fill="{StaticResource BrushSuccess}" Margin="0,0,7,0" VerticalAlignment="Center" />
+                                <TextBlock Text="管理员权限已获取" FontSize="11" Foreground="{StaticResource BrushText}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="6" Height="6" Fill="{StaticResource BrushSuccess}" Margin="0,0,7,0" VerticalAlignment="Center" />
+                                <TextBlock Text="网络已连接" FontSize="11" Foreground="{StaticResource BrushText}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
 
-            <Border Grid.Row="0" Style="{StaticResource CardBorderStyle}" Padding="16" Margin="0,0,0,18">
-                <DockPanel>
-                    <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource BrushMutedText}" />
-                    <TextBlock DockPanel.Dock="Right" Text="安装向导" Foreground="{StaticResource BrushAccent}" FontWeight="SemiBold" />
+                    <!-- Nav items -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Steps}" Margin="10,10">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource NavButtonStyle}"
+                                            Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding}"
+                                            Margin="0,2">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Width="20" Height="20" CornerRadius="10"
+                                                    BorderBrush="{StaticResource BrushBorder}" BorderThickness="1.5"
+                                                    Margin="0,0,10,0">
+                                                <TextBlock Text="·" FontSize="10" FontWeight="SemiBold"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                           Foreground="{StaticResource BrushMutedText}" />
+                                            </Border>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="Medium" />
+                                                <TextBlock Text="{Binding Description}" FontSize="10.5"
+                                                           Foreground="{StaticResource BrushMutedText}"
+                                                           TextWrapping="Wrap" Margin="0,2,0,0" MaxWidth="150" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </DockPanel>
             </Border>
 
-            <ContentControl Grid.Row="1" Content="{Binding CurrentStep}" />
+            <!-- Main content -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Topbar breadcrumb -->
+                <Border Grid.Row="0" BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,0,0,1"
+                        Padding="26,12">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="DEV-INIT" FontSize="12" Foreground="{StaticResource BrushMutedText}" />
+                        <TextBlock Text=" › " FontSize="12" Foreground="{StaticResource BrushMutedText}" Margin="4,0" />
+                        <TextBlock Text="{Binding CurrentStep.Title}" FontSize="12"
+                                   Foreground="{StaticResource BrushPrimary}" FontWeight="Medium" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Page content via DataTemplate -->
+                <ContentControl Grid.Row="1" Content="{Binding CurrentStep}" />
+            </Grid>
         </Grid>
-    </Grid>
+    </Border>
 </Window>

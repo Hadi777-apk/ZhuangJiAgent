@@ -1,47 +1,88 @@
 <UserControl x:Class="DevEnvInit.App.Views.PathConfigView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Border Style="{StaticResource CardBorderStyle}">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0">
-                <TextBlock Text="路径配置" FontSize="28" FontWeight="SemiBold" />
-                <TextBlock Text="确认或修改安装根目录 — 下载和临时目录自动跟随。本页不放命令预览区域。" Margin="0,12,0,0" Foreground="{StaticResource BrushMutedText}" TextWrapping="Wrap" />
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="26,20,26,0">
+            <StackPanel>
+                <StackPanel>
+                    <TextBlock Text="路径配置" Style="{StaticResource PageTitleStyle}" />
+                    <TextBlock Text="确认安装根目录 — 下载和临时目录自动跟随，本页不放命令预览区域"
+                               FontSize="13" Foreground="{StaticResource BrushText}" />
+                </StackPanel>
+
+                <!-- Install root -->
+                <Border Style="{StaticResource InfoCardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="安装根目录" Style="{StaticResource SectionLabelStyle}" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox Text="{Binding InstallRoot, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource PathInputStyle}" HorizontalAlignment="Stretch" />
+                            <Button Content="浏览" Style="{StaticResource GhostButtonStyle}" Width="60" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Auto paths -->
+                <Border Style="{StaticResource InfoCardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="下载缓存目录（自动跟随）" Style="{StaticResource SectionLabelStyle}" />
+                        <TextBox Text="{Binding DownloadDirectory}" Style="{StaticResource PathInputStyle}"
+                                 IsReadOnly="True" Opacity="0.65" />
+                        <TextBlock Text="临时解压目录（自动跟随）" Style="{StaticResource SectionLabelStyle}"
+                                   Margin="0,4,0,0" />
+                        <TextBox Text="{Binding TempDirectory}" Style="{StaticResource PathInputStyle}"
+                                 IsReadOnly="True" Opacity="0.65" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Disk space -->
+                <Border Style="{StaticResource InfoCardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="磁盘空间" Style="{StaticResource SectionLabelStyle}" />
+                        <TextBlock Text="{Binding Summary}" FontSize="12"
+                                   Foreground="{StaticResource BrushMutedText}" />
+                        <TextBlock Text="可用磁盘" FontSize="11" FontWeight="SemiBold"
+                                   Foreground="{StaticResource BrushPrimary}" Margin="0,4,0,0" />
+                        <DataGrid ItemsSource="{Binding Drives}" AutoGenerateColumns="False"
+                                  IsReadOnly="True" HeadersVisibility="Column"
+                                  Background="{StaticResource BrushSurfaceCard}"
+                                  Foreground="{StaticResource BrushTitle}"
+                                  BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                                  GridLinesVisibility="None" RowHeight="36" MaxHeight="160">
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="Background" Value="{StaticResource BrushSurfaceAlt}" />
+                                    <Setter Property="Foreground" Value="{StaticResource BrushMutedText}" />
+                                    <Setter Property="FontSize" Value="11" />
+                                    <Setter Property="Padding" Value="10,6" />
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="驱动器" Binding="{Binding Name}" Width="80" />
+                                <DataGridTextColumn Header="标签" Binding="{Binding VolumeLabel}" Width="140" />
+                                <DataGridTextColumn Header="总大小" Binding="{Binding TotalSize}" Width="100" />
+                                <DataGridTextColumn Header="可用空间" Binding="{Binding AvailableFree}" Width="100" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
             </StackPanel>
+        </ScrollViewer>
 
-            <StackPanel Grid.Row="1" Margin="0,18,0,12">
-                <TextBlock Text="安装根目录" Foreground="{StaticResource BrushMutedText}" FontSize="12" />
-                <TextBox Text="{Binding InstallRoot, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,0,0" Background="{StaticResource BrushSurfaceAlt}" Foreground="{StaticResource BrushText}" BorderBrush="{StaticResource BrushBorder}" Padding="10,8" />
-
-                <TextBlock Text="下载缓存目录（自动跟随）" Margin="0,10,0,0" Foreground="{StaticResource BrushMutedText}" FontSize="12" />
-                <TextBox Text="{Binding DownloadDirectory}" Margin="0,4,0,0" Background="{StaticResource BrushSurfaceAlt}" Foreground="{StaticResource BrushMutedText}" BorderBrush="{StaticResource BrushBorder}" Padding="10,8" IsReadOnly="True" />
-
-                <TextBlock Text="临时解压目录（自动跟随）" Margin="0,10,0,0" Foreground="{StaticResource BrushMutedText}" FontSize="12" />
-                <TextBox Text="{Binding TempDirectory}" Margin="0,4,0,0" Background="{StaticResource BrushSurfaceAlt}" Foreground="{StaticResource BrushMutedText}" BorderBrush="{StaticResource BrushBorder}" Padding="10,8" IsReadOnly="True" />
-            </StackPanel>
-
-            <DockPanel Grid.Row="2" Margin="0,0,0,12">
-                <Button DockPanel.Dock="Right" Content="检查空间" Padding="18,8" Command="{Binding CheckSpaceCommand}" />
-                <TextBlock Text="{Binding Summary}" VerticalAlignment="Center" Foreground="{StaticResource BrushMutedText}" TextWrapping="Wrap" />
+        <Border Grid.Row="1" BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,1,0,0"
+                Padding="26,12">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="检查空间"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding CheckSpaceCommand}" />
+                <TextBlock Text="{Binding Summary}" VerticalAlignment="Center"
+                           FontSize="12" Foreground="{StaticResource BrushMutedText}" />
             </DockPanel>
-
-            <TextBlock Grid.Row="3" Text="可用磁盘" Foreground="{StaticResource BrushAccent}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6" />
-
-            <DataGrid Grid.Row="4" ItemsSource="{Binding Drives}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" Background="{StaticResource BrushSurfaceAlt}" Foreground="{StaticResource BrushText}" BorderBrush="{StaticResource BrushBorder}" GridLinesVisibility="None">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="驱动器" Binding="{Binding Name}" Width="80" />
-                    <DataGridTextColumn Header="标签" Binding="{Binding VolumeLabel}" Width="160" />
-                    <DataGridTextColumn Header="总大小" Binding="{Binding TotalSize}" Width="120" />
-                    <DataGridTextColumn Header="可用空间" Binding="{Binding AvailableFree}" Width="120" />
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
-    </Border>
+        </Border>
+    </Grid>
 </UserControl>
