@@ -153,7 +153,7 @@ Phase 8 will decide one of two strategies:
 - [x] Phase 4: Wire environment detection and software selection to real configuration data.
 - [x] Phase 5: Wire path configuration and disk-space estimates. No command preview area.
 - [x] Phase 6: Wire install progress with dry-run or mock execution first. Extraction logs only; install phase shows progress.
-- [ ] Phase 7: Wire completion report generation and report display.
+- [x] Phase 7: Wire completion report generation and report display.
 - [ ] Phase 8: Decide launcher/elevation ownership, update docs, run final review and verification.
 
 ## Review
