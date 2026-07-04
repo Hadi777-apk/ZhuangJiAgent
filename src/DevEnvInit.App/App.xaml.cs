@@ -36,6 +36,7 @@ public partial class App : Application
 
         services.AddSingleton(InstallSessionState.Empty);
         services.AddSingleton<IManifestService>(_ => new ManifestService(repositoryRoot));
+        services.AddSingleton<IEnvironmentDetectionService>(_ => new WindowsEnvironmentDetectionService(repositoryRoot));
         services.AddSingleton<IAllowlistService, AllowlistService>();
         services.AddSingleton<IHashVerificationService, HashVerificationService>();
         services.AddSingleton<IDiskSpaceCalculatorService, DiskSpaceCalculatorService>();
