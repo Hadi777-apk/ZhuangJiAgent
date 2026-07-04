@@ -56,6 +56,7 @@ public sealed class InstallProgressViewModel : StepViewModel
     public async Task StartInstallAsync()
     {
         IsBusy = true;
+        _cts?.Dispose();
         _cts = new CancellationTokenSource();
         Items.Clear();
         LogLines.Clear();
@@ -103,8 +104,8 @@ public sealed class InstallProgressViewModel : StepViewModel
                     continue;
                 }
 
-                var installerPath = Path.Combine(installersDir, package.Installer);
-                if (!File.Exists(installerPath))
+                var installerPath = GetSafeInstallerPath(installersDir, package.Installer);
+                if (installerPath is null || !File.Exists(installerPath))
                 {
                     LogLines.Add($"[{DateTime.Now:HH:mm:ss}] {package.Name}：安装包未找到（{installerPath}），标记为失败。");
                     item.Status = InstallStatus.Failed;
@@ -199,6 +200,24 @@ public sealed class InstallProgressViewModel : StepViewModel
         }
 
         return directory?.FullName ?? AppContext.BaseDirectory;
+    }
+
+    private static string? GetSafeInstallerPath(string installersDir, string installer)
+    {
+        if (string.IsNullOrWhiteSpace(installer) || Path.IsPathFullyQualified(installer))
+        {
+            return null;
+        }
+
+        var root = Path.GetFullPath(installersDir);
+        var candidate = Path.GetFullPath(Path.Combine(root, installer));
+        var requiredPrefix = root.EndsWith(Path.DirectorySeparatorChar)
+            ? root
+            : root + Path.DirectorySeparatorChar;
+
+        return candidate.StartsWith(requiredPrefix, StringComparison.OrdinalIgnoreCase)
+            ? candidate
+            : null;
     }
 }
 

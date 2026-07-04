@@ -28,6 +28,7 @@ public sealed class PowerShellInstallerService : IInstallerExecutionService
 
         progress.Report(new InstallProgress(package.Name, InstallStatus.Installing, 10, "Starting installer process..."));
 
+        Process? process = null;
         try
         {
             var startInfo = new ProcessStartInfo
@@ -41,39 +42,48 @@ public sealed class PowerShellInstallerService : IInstallerExecutionService
                 WorkingDirectory = Path.GetDirectoryName(installerPath) ?? string.Empty,
             };
 
-            using var process = new Process { StartInfo = startInfo };
+            process = new Process { StartInfo = startInfo };
             var outputBuilder = new StringBuilder();
             var errorBuilder = new StringBuilder();
 
-            process.Start();
+            var started = process.Start();
+            if (!started)
+            {
+                return CreateResult(package.Name, InstallStatus.Failed, "Failed to start the installer process.", null);
+            }
 
             var outputTask = ConsumeReaderAsync(process.StandardOutput, outputBuilder, cancellationToken);
             var errorTask = ConsumeReaderAsync(process.StandardError, errorBuilder, cancellationToken);
 
-            // Wait with periodic progress updates
             while (!process.HasExited)
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    try { process.Kill(entireProcessTree: true); } catch { /* best-effort */ }
+                    process.WaitForExit(3000);
+                    progress.Report(new InstallProgress(package.Name, InstallStatus.Canceled, 0, "Installation was canceled."));
+                    return CreateResult(package.Name, InstallStatus.Canceled, "Installation was canceled by the user.", null);
+                }
+
                 progress.Report(new InstallProgress(package.Name, InstallStatus.Installing, 30, "Installing..."));
-                await Task.Delay(1000, cancellationToken);
+                await Task.Delay(1000, CancellationToken.None);
             }
 
-            await Task.WhenAll(outputTask, errorTask).WaitAsync(cancellationToken);
+            await Task.WhenAll(outputTask, errorTask).WaitAsync(CancellationToken.None);
             process.WaitForExit();
 
             var exitCode = process.ExitCode;
             var logContent = $"=== STDOUT ==={Environment.NewLine}{outputBuilder}{Environment.NewLine}=== STDERR ==={Environment.NewLine}{errorBuilder}";
-            await File.WriteAllTextAsync(logPath, logContent, cancellationToken);
+            await File.WriteAllTextAsync(logPath, logContent, CancellationToken.None);
 
             if (exitCode == 0)
             {
-                progress.Report(new InstallProgress(package.Name, InstallStatus.Succeeded, 100, "Installation completed."));
-
                 if (package.RefreshPathAfterInstall)
                 {
-                    progress.Report(new InstallProgress(package.Name, InstallStatus.Installing, 90, "Refreshing system PATH..."));
+                    progress.Report(new InstallProgress(package.Name, InstallStatus.Installing, 95, "Refreshing system PATH..."));
                 }
 
+                progress.Report(new InstallProgress(package.Name, InstallStatus.Succeeded, 100, "Installation completed."));
                 return CreateResult(package.Name, InstallStatus.Succeeded, "Installation completed successfully (exit code 0).", logPath);
             }
 
@@ -81,16 +91,20 @@ public sealed class PowerShellInstallerService : IInstallerExecutionService
             progress.Report(new InstallProgress(package.Name, InstallStatus.Failed, 0, errorMsg));
             return CreateResult(package.Name, InstallStatus.Failed, errorMsg, logPath);
         }
-        catch (OperationCanceledException)
-        {
-            progress.Report(new InstallProgress(package.Name, InstallStatus.Canceled, 0, "Installation was canceled."));
-            return CreateResult(package.Name, InstallStatus.Canceled, "Installation was canceled by the user.", null);
-        }
         catch (Exception ex)
         {
+            if (process is not null && !process.HasExited)
+            {
+                try { process.Kill(entireProcessTree: true); } catch { /* best-effort */ }
+            }
+
             var errorMsg = $"Failed to start installer: {ex.Message}";
             progress.Report(new InstallProgress(package.Name, InstallStatus.Failed, 0, errorMsg));
             return CreateResult(package.Name, InstallStatus.Failed, errorMsg, null);
+        }
+        finally
+        {
+            process?.Dispose();
         }
     }
 
@@ -117,7 +131,6 @@ public sealed class PowerShellInstallerService : IInstallerExecutionService
             return ("msiexec.exe", args.ToString());
         }
 
-        // Default: .exe or other — assume silent executable
         var exeArgs = new StringBuilder();
         if (package.SilentArgs.Count > 0)
         {
@@ -125,7 +138,6 @@ public sealed class PowerShellInstallerService : IInstallerExecutionService
         }
         else
         {
-            // Common silent fallback for NSIS/Inno Setup installers
             exeArgs.Append("/S");
         }
 
@@ -133,7 +145,8 @@ public sealed class PowerShellInstallerService : IInstallerExecutionService
         {
             if (!string.IsNullOrWhiteSpace(package.InstallDirArgsTemplate))
             {
-                exeArgs.Append(' ').Append(package.InstallDirArgsTemplate.Replace("{path}", installDirectory));
+                var quotedDir = installDirectory.Contains('"') ? installDirectory : $"\"{installDirectory}\"";
+                exeArgs.Append(' ').Append(package.InstallDirArgsTemplate.Replace("{path}", quotedDir));
             }
             else
             {
