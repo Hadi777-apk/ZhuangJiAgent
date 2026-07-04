@@ -46,5 +46,5 @@ public sealed class MainWindowViewModel : ObservableObject
 
     public ICommand NavigateCommand { get; }
 
-    public string StatusText => $"当前步骤：{CurrentStep.Title} · 管理员权限将在后续检测页读取";
+    public string StatusText => $"当前步骤：{CurrentStep.Title} · 系统：先检测再安装";
 }

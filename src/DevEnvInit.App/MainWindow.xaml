@@ -62,7 +62,7 @@
             <Border Grid.Row="0" Style="{StaticResource CardBorderStyle}" Padding="16" Margin="0,0,0,18">
                 <DockPanel>
                     <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource BrushMutedText}" />
-                    <TextBlock DockPanel.Dock="Right" Text="阶段 3 · WPF 壳子" Foreground="{StaticResource BrushAccent}" FontWeight="SemiBold" />
+                    <TextBlock DockPanel.Dock="Right" Text="安装向导" Foreground="{StaticResource BrushAccent}" FontWeight="SemiBold" />
                 </DockPanel>
             </Border>
 
