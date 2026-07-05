@@ -39,14 +39,14 @@
                 </Border>
 
                 <!-- Report content -->
-                <TextBlock Text="{Binding ReportContent}" FontFamily="Cascadia Code, Consolas"
+                <TextBlock Text="{Binding ReportContent, Mode=OneWay}" FontFamily="Cascadia Code, Consolas"
                            FontSize="11.5" Foreground="{StaticResource BrushText}"
                            TextWrapping="Wrap" LineHeight="20" />
 
                 <!-- Result rows -->
                 <StackPanel>
                     <TextBlock Text="安装明细" Style="{StaticResource SectionLabelStyle}" />
-                    <ItemsControl ItemsSource="{Binding ReportItems}">
+                    <ItemsControl ItemsSource="{Binding ReportItems, Mode=OneWay}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Style="{StaticResource InfoCardStyle}" Margin="0,0,0,5"
@@ -56,14 +56,14 @@
                                                 BorderThickness="1"
                                                 Background="{StaticResource BrushSuccessBg}"
                                                 BorderBrush="#6EE7B7">
-                                            <TextBlock Text="{Binding Status}" FontSize="10"
+                                            <TextBlock Text="{Binding Status, Mode=OneWay}" FontSize="10"
                                                        FontWeight="SemiBold"
                                                        Foreground="{StaticResource BrushSuccess}" />
                                         </Border>
                                         <StackPanel>
-                                            <TextBlock Text="{Binding PackageName}" FontSize="13"
+                                            <TextBlock Text="{Binding PackageName, Mode=OneWay}" FontSize="13"
                                                        FontWeight="Medium" Foreground="{StaticResource BrushTitle}" />
-                                            <TextBlock Text="{Binding Message}" FontSize="11"
+                                            <TextBlock Text="{Binding Message, Mode=OneWay}" FontSize="11"
                                                        Foreground="{StaticResource BrushMutedText}" />
                                         </StackPanel>
                                     </DockPanel>

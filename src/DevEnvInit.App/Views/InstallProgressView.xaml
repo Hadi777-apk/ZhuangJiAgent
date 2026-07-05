@@ -33,31 +33,31 @@
                         <TextBlock DockPanel.Dock="Right" VerticalAlignment="Bottom"
                                    FontSize="12" Foreground="{StaticResource BrushMutedText}"
                                    Text="预计剩余 —" />
-                        <TextBlock Text="{Binding ProgressPercent, StringFormat={}{0:F0}%}"
+                        <TextBlock Text="{Binding ProgressPercent, Mode=OneWay, StringFormat={}{0:F0}%}"
                                    FontSize="28" FontWeight="Bold"
                                    Foreground="{StaticResource BrushTitle}" />
                     </DockPanel>
 
                     <!-- Progress bar -->
-                    <ProgressBar Value="{Binding ProgressPercent}" Height="8" Maximum="100"
+                    <ProgressBar Value="{Binding ProgressPercent, Mode=OneWay}" Height="8" Maximum="100"
                                  BorderThickness="0"
                                  Background="{StaticResource BrushBorder}"
                                  Foreground="{StaticResource BrushPrimary}" />
 
                     <!-- Item list -->
-                    <ItemsControl ItemsSource="{Binding Items}">
+                    <ItemsControl ItemsSource="{Binding Items, Mode=OneWay}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Background="{StaticResource BrushBackground}"
                                         CornerRadius="6" Padding="10,8" Margin="0,0,0,5">
                                     <DockPanel>
-                                        <TextBlock DockPanel.Dock="Right" Text="{Binding LogMessage}"
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding LogMessage, Mode=OneWay}"
                                                    FontSize="11" Foreground="{StaticResource BrushMutedText}"
                                                    VerticalAlignment="Center" />
                                         <StackPanel Orientation="Horizontal">
                                             <Ellipse Width="10" Height="10" Fill="{StaticResource BrushBorder}"
                                                      VerticalAlignment="Center" />
-                                            <TextBlock Text="{Binding PackageName}" FontSize="13"
+                                            <TextBlock Text="{Binding PackageName, Mode=OneWay}" FontSize="13"
                                                        FontWeight="Medium" Foreground="{StaticResource BrushTitle}"
                                                        VerticalAlignment="Center" />
                                         </StackPanel>
@@ -93,7 +93,7 @@
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled"
                                   Padding="14,10">
-                        <ItemsControl ItemsSource="{Binding LogLines}">
+                        <ItemsControl ItemsSource="{Binding LogLines, Mode=OneWay}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding}" FontFamily="Cascadia Code, Consolas"

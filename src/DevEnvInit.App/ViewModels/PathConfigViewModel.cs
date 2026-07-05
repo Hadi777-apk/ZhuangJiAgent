@@ -20,6 +20,18 @@ public sealed class PathConfigViewModel : StepViewModel
         _diskSpaceService = diskSpaceService;
         _installRoot = "D:\\AI-Environment-Apps";
         CheckSpaceCommand = new RelayCommand(async _ => await CheckSpaceAsync(), _ => !IsBusy);
+        BrowseCommand = new RelayCommand(_ => BrowseFolder());
+    }
+
+    private void BrowseFolder()
+    {
+        // 纯 WPF 实现：调用 FolderBrowserDialog 的反射方式
+        var dialog = new Microsoft.Win32.OpenFolderDialog();
+        dialog.FolderName = InstallRoot;
+        if (dialog.ShowDialog() == true)
+        {
+            InstallRoot = dialog.FolderName;
+        }
     }
 
     public ObservableCollection<DriveInfoViewModel> Drives { get; } = new(
@@ -35,8 +47,7 @@ public sealed class PathConfigViewModel : StepViewModel
         {
             if (SetProperty(ref _installRoot, value))
             {
-                OnPropertyChanged(nameof(DownloadDirectory));
-                OnPropertyChanged(nameof(TempDirectory));
+                NotifyDerivedPaths();
             }
         }
     }
@@ -45,7 +56,16 @@ public sealed class PathConfigViewModel : StepViewModel
 
     public string TempDirectory => Path.Combine(InstallRoot, "temp");
 
+    // 只读属性需要显式通知 WPF 绑定（Mode=OneWay）
+    private void NotifyDerivedPaths()
+    {
+        OnPropertyChanged(nameof(DownloadDirectory));
+        OnPropertyChanged(nameof(TempDirectory));
+    }
+
     public ICommand CheckSpaceCommand { get; }
+
+    public ICommand BrowseCommand { get; }
 
     public string Summary
     {

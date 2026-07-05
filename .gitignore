@@ -1,22 +1,20 @@
-# Runtime directories
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.user
+*.suo
+.vs/
+.codegraph/
+.cursor/
+crash.log
 backups/
 cache/
-downloads/
-installers/
 logs/
 reports/
 skills/
-
-# .NET / WPF build output
-src/**/bin/
-src/**/obj/
-tests/**/bin/
-tests/**/obj/
-.vs/
-TestResults/
-*.user
-*.suo
-
-# Windows
-Thumbs.db
-Desktop.ini
+installers/*.exe
+installers/*.msi
+installers/*.7z
+installers/*.zip

@@ -37,7 +37,7 @@
                                     BorderBrush="#6EE7B7">
                                 <StackPanel Orientation="Horizontal">
                                     <Ellipse Width="5" Height="5" Fill="{StaticResource BrushSuccess}" VerticalAlignment="Center" />
-                                    <TextBlock Text="Windows Ready" FontSize="11" FontWeight="Medium"
+                                    <TextBlock Text="Windows Ready" FontSize="11" FontWeight="Bold"
                                                Foreground="{StaticResource BrushSuccess}" />
                                 </StackPanel>
                             </Border>
@@ -139,7 +139,7 @@
                     <TextBlock Text="软件安装状态" Style="{StaticResource SectionLabelStyle}" />
                     <TextBlock Text="{Binding Summary}" FontSize="12"
                                Foreground="{StaticResource BrushMutedText}" Margin="0,0,0,4" />
-                    <ItemsControl ItemsSource="{Binding Results}">
+                    <ItemsControl ItemsSource="{Binding Results, Mode=OneWay}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Style="{StaticResource InfoCardStyle}" Margin="0,0,0,5"
@@ -153,14 +153,14 @@
                                                         <Setter Property="BorderBrush" Value="#FCD34D" />
                                                     </Style>
                                                 </Border.Style>
-                                                <TextBlock Text="{Binding Status}" FontSize="10" FontWeight="SemiBold"
+                                                <TextBlock Text="{Binding Status, Mode=OneWay}" FontSize="10" FontWeight="SemiBold"
                                                            Foreground="{StaticResource BrushWarning}" />
                                             </Border>
                                         </StackPanel>
                                         <StackPanel>
-                                            <TextBlock Text="{Binding PackageName}" FontSize="13"
+                                            <TextBlock Text="{Binding PackageName, Mode=OneWay}" FontSize="13"
                                                        FontWeight="Medium" Foreground="{StaticResource BrushTitle}" />
-                                            <TextBlock Text="{Binding Message}" FontSize="11"
+                                            <TextBlock Text="{Binding Message, Mode=OneWay}" FontSize="11"
                                                        Foreground="{StaticResource BrushMutedText}" />
                                         </StackPanel>
                                     </DockPanel>

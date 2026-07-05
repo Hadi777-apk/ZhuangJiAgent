@@ -22,7 +22,8 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBox Text="{Binding InstallRoot, UpdateSourceTrigger=PropertyChanged}"
                                      Style="{StaticResource PathInputStyle}" HorizontalAlignment="Stretch" />
-                            <Button Content="浏览" Style="{StaticResource GhostButtonStyle}" Width="60" />
+                            <Button Content="浏览" Style="{StaticResource GhostButtonStyle}" Width="60"
+                                    Command="{Binding BrowseCommand}" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -31,11 +32,11 @@
                 <Border Style="{StaticResource InfoCardStyle}">
                     <StackPanel>
                         <TextBlock Text="下载缓存目录（自动跟随）" Style="{StaticResource SectionLabelStyle}" />
-                        <TextBox Text="{Binding DownloadDirectory}" Style="{StaticResource PathInputStyle}"
+                        <TextBox Text="{Binding DownloadDirectory, Mode=OneWay}" Style="{StaticResource PathInputStyle}"
                                  IsReadOnly="True" Opacity="0.65" />
                         <TextBlock Text="临时解压目录（自动跟随）" Style="{StaticResource SectionLabelStyle}"
                                    Margin="0,4,0,0" />
-                        <TextBox Text="{Binding TempDirectory}" Style="{StaticResource PathInputStyle}"
+                        <TextBox Text="{Binding TempDirectory, Mode=OneWay}" Style="{StaticResource PathInputStyle}"
                                  IsReadOnly="True" Opacity="0.65" />
                     </StackPanel>
                 </Border>

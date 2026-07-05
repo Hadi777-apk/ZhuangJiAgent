@@ -49,7 +49,7 @@
                                     <TextBlock Text="DEV-INIT" FontSize="13" FontWeight="Bold"
                                                Foreground="{StaticResource BrushTitle}" />
                                     <TextBlock Text="Environment Setup" FontSize="10"
-                                               Foreground="{StaticResource BrushMutedText}" Margin="0,1,0,0" />
+                                               Foreground="{StaticResource BrushMutedText}" Margin="0,1,0,0" FontWeight="Bold" />
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>
@@ -93,10 +93,10 @@
                                                            Foreground="{StaticResource BrushMutedText}" />
                                             </Border>
                                             <StackPanel>
-                                                <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="Medium" />
+                                                <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="Bold" />
                                                 <TextBlock Text="{Binding Description}" FontSize="10.5"
                                                            Foreground="{StaticResource BrushMutedText}"
-                                                           TextWrapping="Wrap" Margin="0,2,0,0" MaxWidth="150" />
+                                                           TextWrapping="Wrap" Margin="0,2,0,0" MaxWidth="150" FontWeight="Normal" />
                                             </StackPanel>
                                         </StackPanel>
                                     </Button>
@@ -121,7 +121,7 @@
                         <TextBlock Text="DEV-INIT" FontSize="12" Foreground="{StaticResource BrushMutedText}" />
                         <TextBlock Text=" › " FontSize="12" Foreground="{StaticResource BrushMutedText}" Margin="4,0" />
                         <TextBlock Text="{Binding CurrentStep.Title}" FontSize="12"
-                                   Foreground="{StaticResource BrushPrimary}" FontWeight="Medium" />
+                                   Foreground="{StaticResource BrushPrimary}" FontWeight="Bold" />
                     </StackPanel>
                 </Border>
 

@@ -14,6 +14,34 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        // 全局异常捕获 —— 防止闪退，记录崩溃日志
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+        {
+            var ex = args.ExceptionObject as Exception;
+            var msg = $"发生严重错误：{ex?.Message}\n{ex?.StackTrace}";
+            File.AppendAllText("crash.log", $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {msg}\n");
+            MessageBox.Show($"发生严重错误：{ex?.Message}\n\n详情已写入 crash.log", "错误",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        };
+
+        DispatcherUnhandledException += (_, args) =>
+        {
+            var ex = args.Exception;
+            var msg = $"UI 线程异常：{ex.Message}\n{ex.StackTrace}";
+            File.AppendAllText("crash.log", $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {msg}\n");
+            args.Handled = true;
+            MessageBox.Show($"UI 线程异常：{ex.Message}\n\n详情已写入 crash.log", "错误",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        };
+
+        TaskScheduler.UnobservedTaskException += (_, args) =>
+        {
+            var ex = args.Exception?.InnerException ?? args.Exception;
+            var msg = $"异步任务异常：{ex?.Message}\n{ex?.StackTrace}";
+            File.AppendAllText("crash.log", $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {msg}\n");
+            args.SetObserved();
+        };
+
         base.OnStartup(e);
 
         var services = new ServiceCollection();

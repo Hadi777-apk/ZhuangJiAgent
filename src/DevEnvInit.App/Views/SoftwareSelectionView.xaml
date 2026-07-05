@@ -46,10 +46,10 @@
                     <DataGrid.Columns>
                         <DataGridCheckBoxColumn Header="选择" Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Width="60" />
                         <DataGridTextColumn Header="软件名称" Binding="{Binding Name}" Width="180" IsReadOnly="True" />
-                        <DataGridTextColumn Header="安装包文件" Binding="{Binding Installer}" Width="200" IsReadOnly="True" />
-                        <DataGridTextColumn Header="版本要求" Binding="{Binding RequiredVersion}" Width="120" IsReadOnly="True" />
-                        <DataGridTextColumn Header="安装策略" Binding="{Binding PolicyText}" Width="140" IsReadOnly="True" />
-                        <DataGridCheckBoxColumn Header="可自动选" Binding="{Binding IsEnabled}" Width="80" IsReadOnly="True" />
+                        <DataGridTextColumn Header="安装包文件" Binding="{Binding Installer, Mode=OneWay}" Width="200" IsReadOnly="True" />
+                        <DataGridTextColumn Header="版本要求" Binding="{Binding RequiredVersion, Mode=OneWay}" Width="120" IsReadOnly="True" />
+                        <DataGridTextColumn Header="安装策略" Binding="{Binding PolicyText, Mode=OneWay}" Width="140" IsReadOnly="True" />
+                        <DataGridCheckBoxColumn Header="可自动选" Binding="{Binding IsEnabled, Mode=OneWay}" Width="80" IsReadOnly="True" />
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>

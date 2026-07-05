@@ -11,6 +11,7 @@ public sealed class InstallProgressViewModel : StepViewModel
 {
     private readonly IInstallerExecutionService _installerService;
     private readonly IManifestService _manifestService;
+    private readonly PathConfigViewModel _pathConfig;
     private string _summary = "尚未开始安装。请先从前面的步骤选择合适的软件和路径。";
     private bool _isBusy;
     private int _completedCount;
@@ -19,11 +20,13 @@ public sealed class InstallProgressViewModel : StepViewModel
 
     public InstallProgressViewModel(
         IInstallerExecutionService installerService,
-        IManifestService manifestService)
+        IManifestService manifestService,
+        PathConfigViewModel pathConfig)
         : base("执行安装", "显示整体安装进度、软件状态和终端风格日志。")
     {
         _installerService = installerService;
         _manifestService = manifestService;
+        _pathConfig = pathConfig;
         StartInstallCommand = new RelayCommand(async _ => await StartInstallAsync(), _ => !IsBusy);
     }
 
