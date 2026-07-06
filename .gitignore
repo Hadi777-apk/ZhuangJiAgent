@@ -1,0 +1,54 @@
+## .NET Build artifacts
+bin/
+obj/
+*.user
+*.suo
+*.cache
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio
+.vs/
+*.userprefs
+*.pidb
+*.booproj
+*.swp
+*~
+
+## Rider
+.idea/
+
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Temporary files
+*.tmp
+*.temp
+*.log
+*.wrn
+
+## Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+## Other
+appsettings.Development.json
+downloads/
+*.exe.config

@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://zhuangjiagent.dev/schemas/manifest-v1.json",
+  "title": "ZhuangJiAgent Manifest",
+  "description": "装机Agent软件清单定义格式",
+  "type": "object",
+  "required": ["manifestVersion", "lastUpdated", "agentVersion", "packages"],
+  "properties": {
+    "manifestVersion": {
+      "type": "string",
+      "description": "清单格式版本",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "default": "1.0.0"
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "清单最后更新时间 (ISO 8601)"
+    },
+    "agentVersion": {
+      "type": "string",
+      "description": "对应的Agent工具版本",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "updateInfo": {
+      "type": "object",
+      "description": "Agent自身更新信息（可选）",
+      "required": ["latestVersion", "downloadUrl", "releaseDate"],
+      "properties": {
+        "latestVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "downloadUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "releaseNotes": {
+          "type": "string",
+          "description": "更新说明（Markdown格式）"
+        },
+        "releaseDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "mandatory": {
+          "type": "boolean",
+          "description": "是否强制更新",
+          "default": false
+        }
+      }
+    },
+    "packages": {
+      "type": "array",
+      "description": "软件包列表",
+      "items": {
+        "$ref": "#/definitions/package"
+      }
+    }
+  },
+  "definitions": {
+    "package": {
+      "type": "object",
+      "required": ["id", "name", "version", "category", "publisher", "installer"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "唯一标识符（用于差异对比）",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "显示名称",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "description": "版本号（语义化版本）",
+          "pattern": "^\\d+\\.\\d+(\\.\\d+)?$"
+        },
+        "category": {
+          "type": "string",
+          "description": "分类",
+          "enum": ["Runtime", "Browser", "Utility", "DevTools", "Media", "Office", "Security", "Other"]
+        },
+        "publisher": {
+          "type": "string",
+          "description": "发布者",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "简短描述"
+        },
+        "installer": {
+          "$ref": "#/definitions/installer"
+        },
+        "detection": {
+          "$ref": "#/definitions/detection"
+        },
+        "dependencies": {
+          "type": "array",
+          "description": "依赖的其他包ID列表",
+          "items": {
+            "type": "string"
+          }
+        },
+        "order": {
+          "type": "integer",
+          "description": "安装顺序（数字越小越优先）",
+          "minimum": 0,
+          "default": 100
+        },
+        "defaultSelected": {
+          "type": "boolean",
+          "description": "是否默认选中",
+          "default": true
+        },
+        "tags": {
+          "type": "array",
+          "description": "标签（用于过滤和搜索）",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "installer": {
+      "type": "object",
+      "required": ["type", "hash", "size", "silentArgs"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["exe", "msi", "msix", "winget", "archive"]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "在线下载地址"
+        },
+        "localPath": {
+          "type": "string",
+          "description": "本地离线分卷路径（相对路径）"
+        },
+        "hash": {
+          "type": "string",
+          "description": "SHA256哈希值（十六进制，64字符）",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "size": {
+          "type": "integer",
+          "description": "文件大小（字节）",
+          "minimum": 0
+        },
+        "silentArgs": {
+          "type": "string",
+          "description": "静默安装参数"
+        },
+        "wingetId": {
+          "type": "string",
+          "description": "WinGet包ID（仅type=winget时需要）"
+        },
+        "mirrors": {
+          "type": "array",
+          "description": "镜像下载地址列表（备用）",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "notes": {
+          "type": "string",
+          "description": "特殊说明（如版本兼容性、UAC提示等）"
+        }
+      },
+      "oneOf": [
+        {
+          "required": ["url"]
+        },
+        {
+          "required": ["localPath"]
+        }
+      ]
+    },
+    "detection": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["registry", "file", "command", "none"]
+        },
+        "registryKey": {
+          "type": "string",
+          "description": "注册表键路径（仅type=registry）"
+        },
+        "registryValue": {
+          "type": "string",
+          "description": "注册表值名称（仅type=registry）"
+        },
+        "filePath": {
+          "type": "string",
+          "description": "文件路径（仅type=file）"
+        },
+        "command": {
+          "type": "string",
+          "description": "检测命令（仅type=command）"
+        },
+        "expectedVersion": {
+          "type": "string",
+          "description": "期望的版本号"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "registry"
+              }
+            }
+          },
+          "then": {
+            "required": ["registryKey"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "file"
+              }
+            }
+          },
+          "then": {
+            "required": ["filePath"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "command"
+              }
+            }
+          },
+          "then": {
+            "required": ["command"]
+          }
+        }
+      ]
+    }
+  }
+}

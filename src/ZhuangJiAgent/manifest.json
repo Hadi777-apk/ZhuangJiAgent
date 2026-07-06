@@ -1,0 +1,134 @@
+{
+  "$schema": "../docs/manifest-schema.json",
+  "manifestVersion": "1.0.0",
+  "lastUpdated": "2026-07-06T00:00:00Z",
+  "agentVersion": "1.0.0",
+  "packages": [
+    {
+      "id": "7zip",
+      "name": "7-Zip 24.08",
+      "version": "24.08",
+      "category": "Utility",
+      "publisher": "Igor Pavlov",
+      "description": "开源高压缩比文件压缩工具",
+      "installer": {
+        "type": "exe",
+        "url": "https://www.7-zip.org/a/7z2408-x64.exe",
+        "localPath": "installers/7zip/7z2408-x64.exe",
+        "hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "size": 1702400,
+        "silentArgs": "/S"
+      },
+      "detection": {
+        "type": "registry",
+        "registryKey": "HKEY_LOCAL_MACHINE\\SOFTWARE\\7-Zip",
+        "registryValue": "Path",
+        "expectedVersion": "24.08"
+      },
+      "order": 10,
+      "defaultSelected": true,
+      "tags": ["压缩", "解压", "开源"]
+    },
+    {
+      "id": "vscode",
+      "name": "Visual Studio Code",
+      "version": "1.95.3",
+      "category": "DevTools",
+      "publisher": "Microsoft",
+      "description": "轻量级代码编辑器",
+      "installer": {
+        "type": "exe",
+        "url": "https://update.code.visualstudio.com/latest/win32-x64-user/stable",
+        "localPath": "installers/vscode/VSCodeUserSetup-x64-1.95.3.exe",
+        "hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "size": 95800000,
+        "silentArgs": "/VERYSILENT /NORESTART /MERGETASKS=!runcode",
+        "mirrors": [
+          "https://vscode.cdn.azure.cn/stable/latest/win32-x64-user/stable"
+        ]
+      },
+      "detection": {
+        "type": "file",
+        "filePath": "%LOCALAPPDATA%\\Programs\\Microsoft VS Code\\Code.exe",
+        "expectedVersion": "1.95.3"
+      },
+      "order": 20,
+      "defaultSelected": true,
+      "tags": ["编辑器", "开发", "微软"]
+    },
+    {
+      "id": "git",
+      "name": "Git for Windows",
+      "version": "2.47.1",
+      "category": "DevTools",
+      "publisher": "Git Community",
+      "description": "分布式版本控制系统",
+      "installer": {
+        "type": "exe",
+        "url": "https://github.com/git-for-windows/git/releases/download/v2.47.1.windows.1/Git-2.47.1-64-bit.exe",
+        "localPath": "installers/git/Git-2.47.1-64-bit.exe",
+        "hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "size": 67100000,
+        "silentArgs": "/VERYSILENT /NORESTART /NOCANCEL /SP- /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS /COMPONENTS=\"icons,ext\\\\reg\\\\shellhere,assoc,assoc_sh\""
+      },
+      "detection": {
+        "type": "command",
+        "command": "git --version",
+        "expectedVersion": "2.47.1"
+      },
+      "order": 5,
+      "defaultSelected": true,
+      "tags": ["版本控制", "开发", "git"]
+    },
+    {
+      "id": "chrome",
+      "name": "Google Chrome",
+      "version": "131.0.6778.86",
+      "category": "Browser",
+      "publisher": "Google LLC",
+      "description": "快速、安全的网络浏览器",
+      "installer": {
+        "type": "exe",
+        "url": "https://dl.google.com/chrome/install/latest/chrome_installer.exe",
+        "localPath": "installers/chrome/chrome_installer.exe",
+        "hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "size": 89600000,
+        "silentArgs": "/silent /install"
+      },
+      "detection": {
+        "type": "registry",
+        "registryKey": "HKEY_CURRENT_USER\\Software\\Google\\Chrome\\BLBeacon",
+        "registryValue": "version",
+        "expectedVersion": "131.0"
+      },
+      "order": 15,
+      "defaultSelected": true,
+      "tags": ["浏览器", "谷歌"]
+    },
+    {
+      "id": "python",
+      "name": "Python 3.12",
+      "version": "3.12.8",
+      "category": "Runtime",
+      "publisher": "Python Software Foundation",
+      "description": "Python编程语言运行时",
+      "installer": {
+        "type": "exe",
+        "url": "https://www.python.org/ftp/python/3.12.8/python-3.12.8-amd64.exe",
+        "localPath": "installers/python/python-3.12.8-amd64.exe",
+        "hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "size": 26800000,
+        "silentArgs": "/quiet InstallAllUsers=1 PrependPath=1 Include_test=0",
+        "notes": "需要管理员权限，安装后需要重启终端才能使用python命令"
+      },
+      "detection": {
+        "type": "command",
+        "command": "python --version",
+        "expectedVersion": "3.12"
+      },
+      "order": 1,
+      "defaultSelected": false,
+      "tags": ["运行时", "编程语言", "python"]
+    }
+  ]
+}

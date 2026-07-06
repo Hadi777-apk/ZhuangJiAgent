@@ -1,0 +1,53 @@
+name: Validate Manifest
+
+on:
+  pull_request:
+    paths:
+      - 'samples/manifest.json'
+      - 'docs/manifest-schema.json'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install AJV (JSON Schema validator)
+      run: npm install -g ajv-cli
+
+    - name: Validate manifest.json against schema
+      run: ajv validate -s docs/manifest-schema.json -d samples/manifest.json --strict=false
+
+    - name: Check for duplicate package IDs
+      run: |
+        DUPLICATES=$(jq -r '.packages[].id' samples/manifest.json | sort | uniq -d)
+        if [ -n "$DUPLICATES" ]; then
+          echo "❌ 发现重复的包 ID:"
+          echo "$DUPLICATES"
+          exit 1
+        else
+          echo "✅ 没有重复的包 ID"
+        fi
+
+    - name: Check hash format
+      run: |
+        INVALID_HASHES=$(jq -r '.packages[] | select(.installer.hash | test("^[0-9a-f]{64}$") | not) | .id' samples/manifest.json)
+        if [ -n "$INVALID_HASHES" ]; then
+          echo "❌ 以下包的哈希值格式无效（应为 64 位小写十六进制）:"
+          echo "$INVALID_HASHES"
+          exit 1
+        else
+          echo "✅ 所有哈希值格式正确"
+        fi
+
+    - name: Success message
+      run: |
+        echo "✅ 清单验证通过！"
+        echo "📦 软件包数量: $(jq '.packages | length' samples/manifest.json)"
