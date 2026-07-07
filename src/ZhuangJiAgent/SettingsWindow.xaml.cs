@@ -9,6 +9,7 @@ namespace ZhuangJiAgent;
 public partial class SettingsWindow : Window
 {
     private readonly SettingsViewModel _viewModel;
+    private bool _initialized;
 
     public SettingsWindow(SettingsViewModel viewModel)
     {
@@ -22,6 +23,10 @@ public partial class SettingsWindow : Window
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
+        // 单例窗口可能被多次 ShowDialog，ViewModel 只在首次加载时初始化一次
+        if (_initialized)
+            return;
+        _initialized = true;
         await _viewModel.InitializeAsync();
     }
 }

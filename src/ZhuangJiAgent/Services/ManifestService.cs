@@ -18,13 +18,15 @@ public sealed class ManifestService : IManifestService
         WriteIndented = true
     };
 
-    private const string LocalManifestPath = "manifest.json";
-    private const string RemoteManifestUrl = "https://raw.githubusercontent.com/your-repo/manifests/main/manifest.json";
+    private const string LocalManifestFileName = "manifest.json";
+    private const string DefaultRemoteManifestUrl = "https://raw.githubusercontent.com/Hadi777-apk/ZhuangJiAgent/main/src/ZhuangJiAgent/manifest.json";
 
     /// <inheritdoc/>
     public async Task<InstallManifest> LoadLocalManifestAsync(CancellationToken cancellationToken = default)
     {
-        if (!File.Exists(LocalManifestPath))
+        // 优先使用设置中配置的远程清单 URL（无配置时使用默认仓内清单）
+        var localPath = Path.Combine(AppPaths.BaseDirectory, LocalManifestFileName);
+        if (!File.Exists(localPath))
         {
             return new InstallManifest
             {
@@ -35,7 +37,7 @@ public sealed class ManifestService : IManifestService
             };
         }
 
-        var json = await File.ReadAllTextAsync(LocalManifestPath, cancellationToken);
+        var json = await File.ReadAllTextAsync(localPath, cancellationToken);
         var manifest = JsonSerializer.Deserialize<InstallManifest>(json, JsonOptions)
             ?? throw new InvalidOperationException("Failed to deserialize local manifest");
 
@@ -50,7 +52,8 @@ public sealed class ManifestService : IManifestService
 
         try
         {
-            var json = await HttpClient.GetStringAsync(RemoteManifestUrl, cts.Token);
+            var url = ResolveRemoteManifestUrl();
+            var json = await HttpClient.GetStringAsync(url, cts.Token);
             var manifest = JsonSerializer.Deserialize<InstallManifest>(json, JsonOptions);
 
             if (manifest is null)
@@ -62,6 +65,15 @@ public sealed class ManifestService : IManifestService
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// 解析远程清单 URL：设置中显式配置优先，否则使用默认仓内清单。
+    /// </summary>
+    private static string ResolveRemoteManifestUrl()
+    {
+        var configured = SettingsService.TryLoadRemoteManifestUrl();
+        return !string.IsNullOrWhiteSpace(configured) ? configured! : DefaultRemoteManifestUrl;
     }
 
     /// <inheritdoc/>
@@ -130,11 +142,12 @@ public sealed class ManifestService : IManifestService
     public async Task SaveLocalManifestAsync(InstallManifest manifest, CancellationToken cancellationToken = default)
     {
         var json = JsonSerializer.Serialize(manifest, JsonOptions);
+        var localPath = Path.Combine(AppPaths.BaseDirectory, LocalManifestFileName);
 
         // 原子写入：先写临时文件，再替换
-        var tempPath = LocalManifestPath + ".tmp";
+        var tempPath = localPath + ".tmp";
         await File.WriteAllTextAsync(tempPath, json, cancellationToken);
-        File.Move(tempPath, LocalManifestPath, overwrite: true);
+        File.Move(tempPath, localPath, overwrite: true);
     }
 
     /// <inheritdoc/>

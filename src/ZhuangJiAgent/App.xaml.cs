@@ -44,13 +44,13 @@ public partial class App : Application
 
         // Phase 6 - ViewModels
         services.AddSingleton<MainViewModel>();
-        services.AddTransient<SettingsViewModel>();
+        services.AddSingleton<SettingsViewModel>();
 
-        // 注册窗口
+        // 注册窗口（MainViewModel 持有 SettingsWindow 工厂，SettingsWindow 单例避免多次 ShowDialog 堆叠）
         services.AddSingleton<MainWindow>();
-        services.AddTransient<SettingsWindow>();
+        services.AddSingleton<SettingsWindow>();
 
-        // 注册 SettingsWindow 工厂
+        // 注册 SettingsWindow 工厂（始终返回同一单例实例）
         services.AddSingleton<Func<SettingsWindow>>(provider => () => provider.GetRequiredService<SettingsWindow>());
     }
 

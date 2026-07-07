@@ -13,7 +13,6 @@ public sealed class UpdateService : IUpdateService
     private readonly IDownloadService _downloadService;
 
     private const string DownloadCacheDirectory = "downloads/latest";
-
     public UpdateService(
         ISourceResolver sourceResolver,
         IManifestService manifestService,
@@ -51,7 +50,8 @@ public sealed class UpdateService : IUpdateService
 
             // 空间预占用检查（审查建议）
             var totalSize = report.Diff.TotalDownloadSize;
-            if (!_downloadService.CheckDiskSpace(DownloadCacheDirectory, totalSize))
+            var cacheDir = AppPaths.ResolvePath(DownloadCacheDirectory);
+            if (!_downloadService.CheckDiskSpace(cacheDir, totalSize))
             {
                 throw new InvalidOperationException(
                     $"磁盘空间不足。需要 {FormatBytes(totalSize)}，请清理磁盘后重试。");
@@ -112,11 +112,12 @@ public sealed class UpdateService : IUpdateService
         IProgress<DownloadProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        Directory.CreateDirectory(DownloadCacheDirectory);
+        var cacheDir = AppPaths.ResolvePath(DownloadCacheDirectory);
+        Directory.CreateDirectory(cacheDir);
 
         return await _downloadService.DownloadPackagesAsync(
             packages,
-            DownloadCacheDirectory,
+            cacheDir,
             progress,
             cancellationToken);
     }

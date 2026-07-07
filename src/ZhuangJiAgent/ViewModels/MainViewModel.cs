@@ -209,7 +209,11 @@ public sealed class MainViewModel : ViewModelBase
             // 后台静默检查更新
             if (networkState == NetworkState.Online)
             {
-                _ = Task.Run(async () => await CheckForUpdatesAsync());
+                _ = CheckForUpdatesAsync().ContinueWith(
+                    t => StatusMessage = $"检查更新失败: {t.Exception?.InnerException?.Message ?? t.Exception?.Message}",
+                    CancellationToken.None,
+                    TaskContinuationOptions.OnlyOnFaulted,
+                    TaskScheduler.FromCurrentSynchronizationContext());
             }
         }
         catch (Exception ex)
@@ -323,7 +327,7 @@ public sealed class MainViewModel : ViewModelBase
                 // 检查是否有本地路径
                 if (!string.IsNullOrWhiteSpace(package.Installer.LocalPath))
                 {
-                    var localPath = System.IO.Path.GetFullPath(package.Installer.LocalPath);
+                    var localPath = AppPaths.ResolvePath(package.Installer.LocalPath);
                     if (System.IO.File.Exists(localPath))
                     {
                         installerPaths[package.Id] = localPath;
@@ -376,7 +380,7 @@ public sealed class MainViewModel : ViewModelBase
 
                 var downloadedPaths = await _downloadService.DownloadPackagesAsync(
                     packagesNeedDownload,
-                    "downloads/cache",
+                    AppPaths.ResolvePath("downloads/cache"),
                     downloadProgress);
 
                 foreach (var (packageId, path) in downloadedPaths)
@@ -507,6 +511,8 @@ public sealed class MainViewModel : ViewModelBase
     {
         var settingsWindow = _settingsWindowFactory();
         settingsWindow.Owner = System.Windows.Application.Current.MainWindow;
+        // 单例窗口：若用户已关过一次，Closed 行为默认允许再次 ShowDialog；
+        // 由 DI 容器保证始终是同一实例，避免堆叠多个 SettingsWindow。
         settingsWindow.ShowDialog();
     }
 }
