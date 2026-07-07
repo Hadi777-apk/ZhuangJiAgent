@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -9,6 +9,7 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>ZhuangJiAgent</AssemblyName>
     <RootNamespace>ZhuangJiAgent</RootNamespace>
+    <PlatformTarget>ARM64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>

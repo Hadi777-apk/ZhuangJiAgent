@@ -49,6 +49,9 @@ public partial class App : Application
         // 注册窗口
         services.AddSingleton<MainWindow>();
         services.AddTransient<SettingsWindow>();
+
+        // 注册 SettingsWindow 工厂
+        services.AddSingleton<Func<SettingsWindow>>(provider => () => provider.GetRequiredService<SettingsWindow>());
     }
 
     protected override async void OnStartup(StartupEventArgs e)

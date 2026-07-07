@@ -13,6 +13,10 @@
         MinWidth="800"
         WindowStartupLocation="CenterScreen"
         Background="#F5F5F5">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="60"/>
@@ -268,9 +272,4 @@
             </StackPanel>
         </Border>
     </Grid>
-
-    <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
-    </Window.Resources>
 </Window>
