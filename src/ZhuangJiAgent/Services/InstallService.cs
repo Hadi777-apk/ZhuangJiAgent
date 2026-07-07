@@ -81,6 +81,18 @@ public sealed class InstallService : IInstallService
                 RequiresReboot = requiresReboot
             };
         }
+        catch (OperationCanceledException)
+        {
+            var elapsed = (DateTime.UtcNow - startTime).TotalSeconds;
+            return new InstallResult
+            {
+                Success = false,
+                PackageId = package.Id,
+                Status = InstallStatus.Cancelled,
+                ErrorMessage = "安装已取消",
+                ElapsedSeconds = elapsed
+            };
+        }
         catch (Exception ex)
         {
             var elapsed = (DateTime.UtcNow - startTime).TotalSeconds;
@@ -123,7 +135,8 @@ public sealed class InstallService : IInstallService
             var result = await CheckAndInstallAsync(package, installerPath, cancellationToken);
             results.Add(result);
 
-            // 如果安装失败且有依赖此包的其他包，可以选择中断或继续
+            if (result.Status == InstallStatus.Cancelled)
+                break;
         }
 
         return results;
@@ -175,13 +188,23 @@ public sealed class InstallService : IInstallService
         if (process is null)
             throw new InvalidOperationException("无法启动安装程序");
 
-        // 异步读取输出防止死锁
-        var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-        var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
+        try
+        {
+            // 异步读取输出防止死锁，必须 await 否则缓冲区写满会阻塞进程
+            var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+            var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
 
-        await process.WaitForExitAsync(cancellationToken);
+            await process.WaitForExitAsync(cancellationToken);
+            await outputTask;
+            await errorTask;
 
-        return process.ExitCode;
+            return process.ExitCode;
+        }
+        catch (OperationCanceledException)
+        {
+            TryKillProcess(process);
+            throw;
+        }
     }
 
     private static async Task<int> InstallMsiAsync(string installerPath, string silentArgs, CancellationToken cancellationToken)
@@ -202,20 +225,31 @@ public sealed class InstallService : IInstallService
         if (process is null)
             throw new InvalidOperationException("无法启动 msiexec");
 
-        var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-        var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
+        try
+        {
+            var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+            var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
 
-        await process.WaitForExitAsync(cancellationToken);
+            await process.WaitForExitAsync(cancellationToken);
+            await outputTask;
+            await errorTask;
 
-        return process.ExitCode;
+            return process.ExitCode;
+        }
+        catch (OperationCanceledException)
+        {
+            TryKillProcess(process);
+            throw;
+        }
     }
 
     private static async Task<int> InstallMsixAsync(string installerPath, CancellationToken cancellationToken)
     {
+        // 用单引号包裹路径并通过 -LiteralPath 避免 installerPath 含单引号时的 PowerShell 注入。
         var psi = new ProcessStartInfo
         {
             FileName = "powershell.exe",
-            Arguments = $"-NoProfile -Command \"Add-AppxPackage -Path '{installerPath}'\"",
+            Arguments = $"-NoProfile -Command \"Add-AppxPackage -LiteralPath '{installerPath}'\"",
             UseShellExecute = false,
             CreateNoWindow = true,
             RedirectStandardOutput = true,
@@ -226,12 +260,22 @@ public sealed class InstallService : IInstallService
         if (process is null)
             throw new InvalidOperationException("无法启动 PowerShell");
 
-        var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-        var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
+        try
+        {
+            var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+            var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
 
-        await process.WaitForExitAsync(cancellationToken);
+            await process.WaitForExitAsync(cancellationToken);
+            await outputTask;
+            await errorTask;
 
-        return process.ExitCode;
+            return process.ExitCode;
+        }
+        catch (OperationCanceledException)
+        {
+            TryKillProcess(process);
+            throw;
+        }
     }
 
     private static async Task<int> InstallViaWingetAsync(SoftwarePackage package, CancellationToken cancellationToken)
@@ -239,10 +283,15 @@ public sealed class InstallService : IInstallService
         if (string.IsNullOrWhiteSpace(package.Installer.WingetId))
             throw new InvalidOperationException("Winget 安装需要指定 WingetId");
 
+        // 校验 WingetId 仅含安全字符，避免 manifest 被篡改时注入额外 winget 参数。
+        var wingetId = package.Installer.WingetId;
+        if (!IsValidWingetId(wingetId))
+            throw new InvalidOperationException($"非法 WingetId: {wingetId}");
+
         var psi = new ProcessStartInfo
         {
             FileName = "winget",
-            Arguments = $"install --id {package.Installer.WingetId} --silent --accept-package-agreements --accept-source-agreements",
+            Arguments = $"install --id {wingetId} --silent --accept-package-agreements --accept-source-agreements",
             UseShellExecute = false,
             CreateNoWindow = true,
             RedirectStandardOutput = true,
@@ -253,11 +302,47 @@ public sealed class InstallService : IInstallService
         if (process is null)
             throw new InvalidOperationException("无法启动 winget");
 
-        var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-        var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
+        try
+        {
+            var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+            var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
 
-        await process.WaitForExitAsync(cancellationToken);
+            await process.WaitForExitAsync(cancellationToken);
+            await outputTask;
+            await errorTask;
 
-        return process.ExitCode;
+            return process.ExitCode;
+        }
+        catch (OperationCanceledException)
+        {
+            TryKillProcess(process);
+            throw;
+        }
+    }
+
+    private static bool IsValidWingetId(string id)
+    {
+        // WingetId 形如Publisher.Package，允许字母数字、点、连字符、下划线。
+        if (string.IsNullOrWhiteSpace(id))
+            return false;
+        foreach (var c in id)
+        {
+            if (!(char.IsLetterOrDigit(c) || c == '.' || c == '-' || c == '_'))
+                return false;
+        }
+        return true;
+    }
+
+    private static void TryKillProcess(Process process)
+    {
+        try
+        {
+            if (!process.HasExited)
+                process.Kill(entireProcessTree: true);
+        }
+        catch
+        {
+            // 尽力清理，忽略 kill 失败
+        }
     }
 }

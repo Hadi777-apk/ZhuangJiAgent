@@ -99,6 +99,11 @@ public enum InstallStatus
     Failed,
 
     /// <summary>
+    /// 已取消
+    /// </summary>
+    Cancelled,
+
+    /// <summary>
     /// 等待中
     /// </summary>
     Pending,

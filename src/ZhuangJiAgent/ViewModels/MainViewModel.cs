@@ -411,6 +411,7 @@ public sealed class MainViewModel : ViewModelBase
                 {
                     InstallStatus.Success => $"安装成功 ({result.ElapsedSeconds:F1}s)",
                     InstallStatus.AlreadyInstalled => "已安装",
+                    InstallStatus.Cancelled => "已取消",
                     InstallStatus.Failed => $"失败: {result.ErrorMessage}",
                     _ => "未知状态"
                 };
@@ -423,8 +424,11 @@ public sealed class MainViewModel : ViewModelBase
 
             var successCount = sortedSelected.Count(vm => vm.InstallStatus == InstallStatus.Success || vm.InstallStatus == InstallStatus.AlreadyInstalled);
             var failedCount = sortedSelected.Count(vm => vm.InstallStatus == InstallStatus.Failed);
+            var cancelledCount = sortedSelected.Count(vm => vm.InstallStatus == InstallStatus.Cancelled);
 
-            StatusMessage = $"安装完成: 成功 {successCount} 个, 失败 {failedCount} 个";
+            StatusMessage = cancelledCount > 0
+                ? $"安装已取消: 成功 {successCount} 个, 失败 {failedCount} 个, 取消 {cancelledCount} 个"
+                : $"安装完成: 成功 {successCount} 个, 失败 {failedCount} 个";
         }
         catch (Exception ex)
         {

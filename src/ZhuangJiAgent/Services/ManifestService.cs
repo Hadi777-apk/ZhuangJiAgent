@@ -167,6 +167,8 @@ public sealed class ManifestService : IManifestService
 
             if (package.Installer.Hash.Length != 64)
                 errors.Add($"Package {package.Id}: Hash must be 64 hex characters (SHA256)");
+            else if (!IsHashConfigured(package.Installer.Hash))
+                errors.Add($"Package {package.Id}: Hash is all zeros or invalid — fill in real SHA256, or omit to skip verification");
 
             if (package.Installer.Url is null && package.Installer.LocalPath is null)
                 errors.Add($"Package {package.Id}: Either Url or LocalPath must be specified");
@@ -188,5 +190,21 @@ public sealed class ManifestService : IManifestService
             // 如果解析失败，回退到字符串比较
             return string.CompareOrdinal(remoteVersion, localVersion) > 0;
         }
+    }
+
+    /// <summary>
+    /// 判断哈希是否为已配置的真实哈希（与 DownloadService.IsHashConfigured 同语义）。
+    /// 全 0 / 含非十六进制字符视为未配置，校验跳过。
+    /// </summary>
+    private static bool IsHashConfigured(string hash)
+    {
+        if (string.IsNullOrWhiteSpace(hash) || hash.Length != 64)
+            return false;
+        foreach (var c in hash)
+        {
+            if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')))
+                return false;
+        }
+        return hash.Any(c => c != '0');
     }
 }

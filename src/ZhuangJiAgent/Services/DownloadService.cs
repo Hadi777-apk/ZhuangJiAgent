@@ -53,22 +53,25 @@ public sealed class DownloadService : IDownloadService
                 progress,
                 cancellationToken);
 
-            // 报告验证中
-            progress?.Report(new DownloadProgress
+            // 验证哈希（仅在清单配置了真实哈希时校验；全 0 / 空哈希视为未配置，跳过）
+            if (IsHashConfigured(package.Installer.Hash))
             {
-                PackageId = package.Id,
-                BytesDownloaded = package.Installer.Size,
-                TotalBytes = package.Installer.Size,
-                State = DownloadState.Verifying
-            });
+                // 报告验证中
+                progress?.Report(new DownloadProgress
+                {
+                    PackageId = package.Id,
+                    BytesDownloaded = package.Installer.Size,
+                    TotalBytes = package.Installer.Size,
+                    State = DownloadState.Verifying
+                });
 
-            // 验证哈希
-            var isValid = await VerifyHashAsync(targetPath, package.Installer.Hash, cancellationToken);
+                var isValid = await VerifyHashAsync(targetPath, package.Installer.Hash, cancellationToken);
 
-            if (!isValid)
-            {
-                File.Delete(targetPath);
-                throw new InvalidOperationException($"Hash verification failed for package {package.Id}");
+                if (!isValid)
+                {
+                    File.Delete(targetPath);
+                    throw new InvalidOperationException($"Hash verification failed for package {package.Id}");
+                }
             }
 
             // 报告完成
@@ -161,6 +164,24 @@ public sealed class DownloadService : IDownloadService
         {
             return false;
         }
+    }
+
+    /// <summary>
+    /// 判断清单是否配置了真实哈希。全 0 / 空 / 非 64 位十六进制均视为未配置，校验跳过。
+    /// </summary>
+    public static bool IsHashConfigured(string? hash)
+    {
+        if (string.IsNullOrWhiteSpace(hash))
+            return false;
+        if (hash.Length != 64)
+            return false;
+        foreach (var c in hash)
+        {
+            if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')))
+                return false;
+        }
+        // 全 0 视为未配置
+        return hash.Any(c => c != '0');
     }
 
     private static async Task DownloadFileWithResumeAsync(

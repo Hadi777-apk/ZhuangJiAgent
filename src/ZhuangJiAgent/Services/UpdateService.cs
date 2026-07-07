@@ -75,6 +75,10 @@ public sealed class UpdateService : IUpdateService
                 if (!downloadedFiles.TryGetValue(package.Id, out var filePath))
                     continue;
 
+                // 清单配置了真实哈希才校验，否则跳过（与 DownloadService 行为一致）
+                if (!DownloadService.IsHashConfigured(package.Installer.Hash))
+                    continue;
+
                 var isValid = await _downloadService.VerifyHashAsync(
                     filePath,
                     package.Installer.Hash,
