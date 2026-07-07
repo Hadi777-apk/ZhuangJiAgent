@@ -1,0 +1,69 @@
+<UserControl x:Class="DevEnvInit.App.Views.SoftwareSelectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="26,20,26,0">
+            <StackPanel>
+                <StackPanel>
+                    <TextBlock Text="软件清单" Style="{StaticResource PageTitleStyle}" />
+                    <TextBlock Text="从真实 config.json 加载启用软件，按策略给出默认选择"
+                               FontSize="13" Foreground="{StaticResource BrushText}" />
+                </StackPanel>
+
+                <TextBlock Text="{Binding Summary}" FontSize="12"
+                           Foreground="{StaticResource BrushMutedText}" />
+
+                <DataGrid ItemsSource="{Binding Packages}"
+                          AutoGenerateColumns="False"
+                          HeadersVisibility="Column"
+                          Background="{StaticResource BrushSurfaceCard}"
+                          Foreground="{StaticResource BrushTitle}"
+                          BorderBrush="{StaticResource BrushBorder}"
+                          BorderThickness="1"
+                          RowBackground="{StaticResource BrushSurfaceCard}"
+                          AlternatingRowBackground="#FAFAFA"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="{StaticResource BrushBorder}"
+                          RowHeight="42"
+                          CanUserReorderColumns="False"
+                          CanUserResizeRows="False">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="{StaticResource BrushSurfaceAlt}" />
+                            <Setter Property="Foreground" Value="{StaticResource BrushMutedText}" />
+                            <Setter Property="FontSize" Value="11" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                            <Setter Property="Padding" Value="12,8" />
+                            <Setter Property="BorderBrush" Value="{StaticResource BrushBorder}" />
+                            <Setter Property="BorderThickness" Value="0,0,1,1" />
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.Columns>
+                        <DataGridCheckBoxColumn Header="选择" Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Width="60" />
+                        <DataGridTextColumn Header="软件名称" Binding="{Binding Name}" Width="180" IsReadOnly="True" />
+                        <DataGridTextColumn Header="安装包文件" Binding="{Binding Installer, Mode=OneWay}" Width="200" IsReadOnly="True" />
+                        <DataGridTextColumn Header="版本要求" Binding="{Binding RequiredVersion, Mode=OneWay}" Width="120" IsReadOnly="True" />
+                        <DataGridTextColumn Header="安装策略" Binding="{Binding PolicyText, Mode=OneWay}" Width="140" IsReadOnly="True" />
+                        <DataGridCheckBoxColumn Header="可自动选" Binding="{Binding IsEnabled, Mode=OneWay}" Width="80" IsReadOnly="True" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="1" BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,1,0,0"
+                Padding="26,12">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="加载清单"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding LoadPackagesCommand}" />
+                <TextBlock Text="{Binding Summary}" VerticalAlignment="Center"
+                           FontSize="12" Foreground="{StaticResource BrushMutedText}" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

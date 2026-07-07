@@ -1,0 +1,13 @@
+{
+  "allowedDomains": [
+    "python.org",
+    "nodejs.org",
+    "github.com",
+    "api.github.com",
+    "objects.githubusercontent.com",
+    "githubusercontent.com",
+    "tongyi.aliyun.com",
+    "openai.com"
+  ],
+  "notes": "v2.2 下载白名单。只有 direct_url 和 github_release 来源会使用该白名单；winget、official_page、manual 不参与自动下载。"
+}

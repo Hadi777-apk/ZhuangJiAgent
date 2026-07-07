@@ -1,0 +1,89 @@
+<UserControl x:Class="DevEnvInit.App.Views.ReportView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="26,20,26,0">
+            <StackPanel>
+                <StackPanel>
+                    <TextBlock Text="完成报告" Style="{StaticResource PageTitleStyle}" />
+                    <TextBlock Text="安装任务已结束，以下是本次执行摘要"
+                               FontSize="13" Foreground="{StaticResource BrushText}" />
+                </StackPanel>
+
+                <!-- Hero banner -->
+                <Border CornerRadius="12" BorderThickness="1" Padding="18,14">
+                    <Border.Background>
+                        <SolidColorBrush Color="{StaticResource ColorSuccessBg}" />
+                    </Border.Background>
+                    <Border.BorderBrush>
+                        <SolidColorBrush Color="{StaticResource ColorSuccess}" Opacity="0.4" />
+                    </Border.BorderBrush>
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="42" Height="42" CornerRadius="21"
+                                Background="{StaticResource BrushSuccess}">
+                            <TextBlock Text="🎉" FontSize="18"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Environment Ready — 部署成功" FontSize="15"
+                                       FontWeight="Bold" Foreground="{StaticResource BrushTitle}" />
+                            <TextBlock Text="{Binding Summary}" FontSize="11"
+                                       Foreground="{StaticResource BrushText}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Report content -->
+                <TextBlock Text="{Binding ReportContent, Mode=OneWay}" FontFamily="Cascadia Code, Consolas"
+                           FontSize="11.5" Foreground="{StaticResource BrushText}"
+                           TextWrapping="Wrap" LineHeight="20" />
+
+                <!-- Result rows -->
+                <StackPanel>
+                    <TextBlock Text="安装明细" Style="{StaticResource SectionLabelStyle}" />
+                    <ItemsControl ItemsSource="{Binding ReportItems, Mode=OneWay}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource InfoCardStyle}" Margin="0,0,0,5"
+                                        Padding="12,10">
+                                    <DockPanel>
+                                        <Border DockPanel.Dock="Right" CornerRadius="999" Padding="8,3"
+                                                BorderThickness="1"
+                                                Background="{StaticResource BrushSuccessBg}"
+                                                BorderBrush="#6EE7B7">
+                                            <TextBlock Text="{Binding Status, Mode=OneWay}" FontSize="10"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource BrushSuccess}" />
+                                        </Border>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding PackageName, Mode=OneWay}" FontSize="13"
+                                                       FontWeight="Medium" Foreground="{StaticResource BrushTitle}" />
+                                            <TextBlock Text="{Binding Message, Mode=OneWay}" FontSize="11"
+                                                       Foreground="{StaticResource BrushMutedText}" />
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="1" BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,1,0,0"
+                Padding="26,12">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="生成报告"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding GenerateReportCommand}" />
+                <TextBlock Text="{Binding Summary}" VerticalAlignment="Center"
+                           FontSize="12" Foreground="{StaticResource BrushMutedText}" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>
