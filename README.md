@@ -23,6 +23,8 @@
 - 🏢 **企业部署** — 内网私有化清单部署
 - 🎒 **便携工具** — 离线环境照常使用
 
+> **历史归档**：本仓库由 `WPF-UI`（DevEnvInit，PowerShell + 多项目 WPF）与 `ZhuangJiAgent`（单项目 WPF + manifest 驱动）两个仓库合并而来。DevEnvInit 的完整源码、测试与发布说明保留在 [`legacy/DevEnvInit/`](legacy/DevEnvInit/)，仅作历史可追溯，不参与主构建。当前工作树以 ZhuangJiAgent 为准。
+
 ---
 
 ## ✨ 功能特性
